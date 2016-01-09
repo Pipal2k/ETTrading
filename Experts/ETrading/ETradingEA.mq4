@@ -9,7 +9,7 @@
 #property strict
 
 
-#include <ETrading/ETSignalSystem.mqh>
+#include <ETrading/SignalSystem/ETSignalSystem.mqh>
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -29,7 +29,8 @@ int OnInit()
   //Option for Trading Signal Subsystem
   //int ETSSoption = (PIVOT | FPIVOT | DRAW_SR_ROWS | DRAW_SR_MID_PIVOTS | DEBUG_SIGNALS) ;
   
-  int ETSSoption = (PIVOT | DRAW_SR_ROWS   | DRAW_SR_MID_PIVOTS | DEBUG_SIGNALS ) ;
+  int ETDPOption = ( PIVOT );
+  int ETSSoption = ( DRAW_SR_ROWS   | DRAW_SR_MID_PIVOTS  ) ;
  
   //Define ActionPattern
   ActionPattern actionPatterns[1];
@@ -53,11 +54,11 @@ int OnInit()
    actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BARBEARISH]"
                                   +"WHERE [3].SIG_SR_TOUCHLOWERBOUNDERY.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER"; 
    
-    actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBULLISH]"
-                                  +"WHERE [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER && [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [5].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER";                                  
+    //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBULLISH]"
+     //                             +"WHERE [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER && [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [5].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER";                                  
                                   
-   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH]"
-                                  +"WHERE RSI < 30 ";
+   //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH]";
+   //                               +"WHERE RSI > 30 ";
                                   //&& RSI < 30.5";
    //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH][(^) SIG_ANY][SIG_SR_TOUCHLOWERBOUNDERY] WHERE RSI < 30.5";
    //TestCase 2 --> false
@@ -66,7 +67,7 @@ int OnInit()
    //actionPatterns[0].Expression= "[{SIG_BARBEARISH}][{SIG_BARBULLISH}][{SIG_BARBEARISH}][{SIG_BARBEARISH}]";
   //actionPatterns[0].signals[1] 
   
-  initETSignalSystem(ETSSoption,actionPatterns);
+  initETSignalSystem(actionPatterns,ETDPOption,ETSSoption);
   
   int testflag;
    testflag |= SIG_BARBEARISH;
@@ -100,9 +101,9 @@ int OnInit()
    else
    {
      ActionPattern matchingPatterns[];
-      DoSignalProcessing(2000);
+      //DoSignalProcessing(2000);
       ActionPattern matchingPattern[];
-      getMatchingActionPatterns(matchingPattern,false);
+      //getMatchingActionPatterns(matchingPattern,false);
       return(INIT_SUCCEEDED);
     }
   }

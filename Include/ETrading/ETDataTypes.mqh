@@ -40,11 +40,18 @@ enum Position
    None
 };
 
-enum SR_Find_Options
+enum DataProviderSys_Options
 {
    PIVOT = 0x01,
    FPIVOT = 0x02,
    KEYLEVELS =0x04,
+};
+
+enum SR_Find_Options
+{
+   //PIVOT = 0x01,
+   //FPIVOT = 0x02,
+   //KEYLEVELS =0x04,
    DRAW_SR_ROWS= 0x08,
    DRAW_SR_MID_PIVOTS = 0x10,
    DEBUG_SIGNALS = 0x20

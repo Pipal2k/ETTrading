@@ -8,28 +8,33 @@
 #property strict
 
 #include <ETrading/ETdataTypes.mqh>
-#include <ETrading/ETPivot.mqh>
+#include <ETrading/DataProviderSystem/ETPivot.mqh>
+#include <ETrading/DataProviderSystem/ETDataProviderSystem.mqh>
 #include <ETrading/ETBarBuffer.mqh>
-#include <ETrading/ETSignalProcessing.mqh>
-#include <ETrading/ETActionPattern.mqh>
-#include <ETrading/ETActionPatternMatch.mqh>
+#include <ETrading/SignalSystem/ETSignalProcessing.mqh>
+#include <ETrading/SignalSystem/ETActionPattern.mqh>
+#include <ETrading/SignalSystem/ETActionPatternMatch.mqh>
 
 //#define PIVOT 
 
-int SignalSystemOptions=0;
-SR_Zone zones[];
+int SignalSystemOptions = 0;
+
+//SR_Zone zones[];
 //ActionPattern actionPatterns[];
 Buffers barBuffers;
 ETSignal CurrentSignals[];
 ETSignal lastSignal;
-SR_Row sr_rows[];
+ProvidedData provData;
+
 
 CompiledActionPattern compActionPatterns[];
 
 
-void initETSignalSystem(int SignalSystemOptions_Flags, ActionPattern &input_actionPatterns[]) export
+void initETSignalSystem( ActionPattern &input_actionPatterns[], int DataProviderOptions_Flags, int SignalSystemOptions_Flags) export
 {  
    SignalSystemOptions = SignalSystemOptions_Flags;
+   initDataProviderSys(DataProviderOptions_Flags);
+  //DataProviderOptions = DataProviderOptions_Flags;
    PrintOptions();
   // copyActionPattern(actionPatterns,input_actionPatterns);
    
@@ -49,13 +54,15 @@ void initETSignalSystem(int SignalSystemOptions_Flags, ActionPattern &input_acti
 
 bool DoSignalProcessing(int count) export
 {
-   // if(Volume[0]>1)
-    //    return false;
+    /*if(Volume[0]>1)
+        return false;*/
     
     
    // ArrayFree(zones);
     //Support Resistance Lineien
-    findSRZones(zones);
+    //findSRZones(zones,DataProviderOptions);
+    
+    provideData(provData);
     
     initBuffers(barBuffers,Time[0],count,Period(),false); 
     //Print("Debug: "+barBuffers.TimeBuffer[0]);
@@ -65,7 +72,7 @@ bool DoSignalProcessing(int count) export
    //  Print("RSI AT: "+barBuffers.TimeBuffer[i]+" "+barBuffers.RSIBuffer[i]);
    // }
     
-    process(barBuffers,CurrentSignals,zones,lastSignal);
+    process(barBuffers,CurrentSignals,provData,lastSignal);
     
     if(ArraySize(CurrentSignals) > 0)
        copyETSignal(CurrentSignals[ArraySize(CurrentSignals)-1],lastSignal);
@@ -109,35 +116,7 @@ void getMatchingActionPatterns(ActionPattern &matchingPatterns[],bool onTime)
 }
 
 
-void findSRZones(SR_Zone &zoens[]) export
-{
-  
-  ArrayFree(sr_rows);
-  ArrayFree(zones);
-  
-  if(SignalSystemOptions & PIVOT)
-   calculatePivot(sr_rows,PERIOD_D1,Standard);
-  
-  if(SignalSystemOptions & FPIVOT)
-   calculatePivot(sr_rows,PERIOD_D1,Fibo);
-   
 
-   
-   RowsToZones(zones,sr_rows);
-}
-
-void RowsToZones(SR_Zone &destZones[], SR_Row &rows[])
-{
-   ArrayFree(destZones);
-   
-   for(int i; i < ArraySize(rows); i++)
-   {
-     ArrayResize(destZones, ArraySize(destZones)+1,0);
-     destZones[ArraySize(destZones)-1].HighBorder= rows[i].Prize;
-     destZones[ArraySize(destZones)-1].LowBorder= rows[i].Prize;
-   }
-
-}
 
 
 void PrintOptions() export

@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                             ETIndikatorInfos.mqh |
+//|                                         ETDataProviderSystem.mqh |
 //|                        Copyright 2015, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -7,7 +7,8 @@
 #property link      "https://www.mql5.com"
 #property strict
 
-#include  <ETrading/ETDataTypes.mqh>
+#include <ETrading/ETdataTypes.mqh>
+#include <ETrading/DataProviderSystem/ETPivot.mqh>
 //+------------------------------------------------------------------+
 //| defines                                                          |
 //+------------------------------------------------------------------+
@@ -28,18 +29,51 @@
 //   string ErrorDescription(int error_code);
 // #import
 //+------------------------------------------------------------------+
-void setIndikatorInfos(MetaInfo &info)
+
+SR_Row sr_rows[];
+int DataProviderOptions;
+
+struct ProvidedData {
+   SR_Zone zones[];
+   
+};
+
+void initDataProviderSys(int dpOptions)
 {
-   setRSI(info.RSI);
-   setSTOCH(info.STOCH);
+   DataProviderOptions = dpOptions;
 }
 
-void setRSI(double result)
+void provideData(ProvidedData &data)
 {
-   result = iRSI(NULL,Period(),14,PRICE_CLOSE,0);
+   findSRZones(data.zones);
 }
 
-void setSTOCH(double result)
+void findSRZones(SR_Zone &zones[])
 {
-   result  = iStochastic(NULL,Period(),9,6,6,MODE_SMA,0,MODE_MAIN,0);
+  
+  ArrayFree(sr_rows);
+  ArrayFree(zones);
+  
+  if(DataProviderOptions & PIVOT)
+   calculatePivot(sr_rows,PERIOD_D1,Standard);
+  
+  if(DataProviderOptions & FPIVOT)
+   calculatePivot(sr_rows,PERIOD_D1,Fibo);
+   
+
+   
+   RowsToZones(zones,sr_rows);
+}
+
+void RowsToZones(SR_Zone &destZones[], SR_Row &rows[])
+{
+   ArrayFree(destZones);
+   
+   for(int i; i < ArraySize(rows); i++)
+   {
+     ArrayResize(destZones, ArraySize(destZones)+1,0);
+     destZones[ArraySize(destZones)-1].HighBorder= rows[i].Prize;
+     destZones[ArraySize(destZones)-1].LowBorder= rows[i].Prize;
+   }
+
 }

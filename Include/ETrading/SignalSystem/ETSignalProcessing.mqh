@@ -8,7 +8,8 @@
 #property strict
 #include <ETrading/ETBarBuffer.mqh>
 #include <ETrading/ETDataTypes.mqh>
-#include <ETrading/ETIndikatorInfos.mqh>
+#include <ETrading/DataProviderSystem/ETDataProviderSystem.mqh>
+//#include <ETrading/DataProviderSystem/ETIndikatorInfos.mqh>
 //+------------------------------------------------------------------+
 //| defines                                                          |
 //+------------------------------------------------------------------+
@@ -30,9 +31,11 @@
 // #import
 //+------------------------------------------------------------------+
 
-void process(Buffers &buffer, ETSignal &currentSIgnals[],SR_Zone &zones[],ETSignal &lastSignal)
+void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal)
 {
    ArrayFree(currentSIgnals);
+   
+   
    
    for(int i = 0; i < ArraySize(buffer.TimeBuffer); i++)
    {
@@ -64,23 +67,23 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],SR_Zone &zones[],ETSign
          sig |= SIG_BARBEARISH; 
        
 
-       if(checkSIG_SR_TOUCHLOWERBOUNDERY(tmpBufferThree,zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_TOUCHLOWERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
            sig |= SIG_SR_TOUCHLOWERBOUNDERY;
          
-        if(checkSIG_SR_TOUCHHIGHERBOUNDERY(tmpBufferThree,zones,sig,mInfo,lastMetaInfo))
+        if(checkSIG_SR_TOUCHHIGHERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
            sig |= SIG_SR_TOUCHHIGHERBOUNDERY;
              
-       if(checkSIG_SR_BREAKTHROUGHBEARISH(tmpBufferThree,zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_BREAKTHROUGHBEARISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
          sig |= SIG_SR_BREAKTHROUGHBEARISH;
        //}    
          
-       if(checkSIG_SR_TOUCHBEARISH(tmpBufferThree,zones,sig))
+       if(checkSIG_SR_TOUCHBEARISH(tmpBufferThree,provData.zones,sig))
          sig |= SIG_SR_TOUCHBEARISH;
          
-       if(checkSIG_SR_BREAKTHROUGHBULLISH(tmpBufferThree,zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_BREAKTHROUGHBULLISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
          sig |= SIG_SR_BREAKTHROUGHBULLISH; 
          
-        if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,zones,sig))
+        if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,provData.zones,sig))
          sig |= SIG_SR_TOUCHBULLISH;   
            
       sig |= SIG_ANY;
@@ -183,11 +186,12 @@ bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, M
   {
    for(int i = 0; i < ArraySize(zones); i++)
    {
-     
+   
      if( ((buffer.OpenBuffer[1] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point))
         || (buffer.OpenBuffer[0] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point)))
         && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBEARISH))
       {
+        
          ArrayResize(Info.iSIG_SR_BREAKTHROUGHBEARISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)+1,0);
          //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
          Info.iSIG_SR_BREAKTHROUGHBEARISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)-1]= zones[i];
