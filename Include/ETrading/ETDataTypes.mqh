@@ -374,12 +374,14 @@ void copyActionPattern(ActionPattern &dest, ActionPattern &source)
      copyETSignal(source.matchingSignal,dest.matchingSignal);
 }
 
-struct Position
+struct ETPosition
 {
   double bid;
   double ask;
   
   double stopLoss;
+  double stopLossUnits;
+  
   double takeProfit;
   
   double targets[];

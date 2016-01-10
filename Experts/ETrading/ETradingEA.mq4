@@ -105,9 +105,9 @@ int OnInit()
    else
    {
      ActionPattern matchingPatterns[];
-   //  DoSignalProcessing(1000);
+     //DoSignalProcessing(1000);
      ActionPattern matchingPattern[];
-     getMatchingActionPatterns(matchingPattern,false);
+     //getMatchingActionPatterns(matchingPattern,false);
       
       //ActionPattern tmpActionPattern;
      //copyActionPattern(tmpActionPattern,matchingPattern[0]);
@@ -115,7 +115,8 @@ int OnInit()
      
      ETSignal sig;
      //copyETSignal(matchingPattern[0].matchingSignal[0],sig);
-    
+     //processPositioning(matchingPattern);
+     
      // Print(sig.time+" "+sig.metaInfo.buffer.RSIBuffer[0]);
       return(INIT_SUCCEEDED);
     }
