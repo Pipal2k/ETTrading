@@ -20,6 +20,8 @@
 // #import
 //+------------------------------------------------------------------+
 
+#include <ETrading/ETBarBuffer.mqh>
+
 #define SIG_SR_BREAKTHROUGHBEARISH 0x01
 #define SIG_SR_BREAKTHROUGHBULLISH 0x02
 #define SIG_SR_TOUCHLOWERBOUNDERY 0x04
@@ -31,7 +33,12 @@
 #define SIG_SR_TOUCHBEARISH 0x100
 #define SIG_SR_TOUCHBULLISH 0x200
 #define SIG_ANY 0x400
-
+#define SIG_CS_BEARISHENGULFING 0x800
+#define SIG_CS_BULLISHENGULFING 0x1000
+#define SIG_CS_THREESOLDIERS 0x2000
+#define SIG_CS_THREEDARKCLOUD 0x4000
+#define SIG_CS_HAMMER 0x8000
+#define SIG_CS_INVERTEDHAMMER 0x10000
 
 enum Position
 {
@@ -62,10 +69,6 @@ enum FlagOperator
  OR,
  AND
 };
-
-
-
-
 
 
 enum TriggerType 
@@ -174,6 +177,9 @@ struct MetaInfo
   double RSI;
   double STOCH;
   double CCI;
+  
+  //double open;
+  Buffers buffer;
 };
 
 struct ETSignal
@@ -192,6 +198,17 @@ struct CompiledTerm
    
 };
 
+enum PositionOption
+{
+   SingleTarget = 0x01
+};
+
+enum PositionMethod
+{
+  ATR,
+  SRZONES
+};
+
 struct ActionPattern
 {
   string name;
@@ -199,7 +216,10 @@ struct ActionPattern
   Position pos;
   
   datetime matchingTimes[];
+  PositionMethod posMethod;
+  int posOptions;
   
+  ETSignal matchingSignal[];
   //int signals[]; //Flags 
   
 };
@@ -242,7 +262,10 @@ enum WhereOperantFunc
    iSIG_SR_BREAKTHROUGHBEARISH,
    iSIG_SR_BREAKTHROUGHBULLISH,
    iSIG_SR_TOUCHHIGHERBOUNDERY,
-   iSIG_SR_TOUCHLOWERBOUNDERY
+   iSIG_SR_TOUCHLOWERBOUNDERY,
+   iSIG_BEARISHCANDLESTICK,
+   iSIG_BULLISHCADLESTICK,
+   iSIG_CS_BEARSIHENGULFING
 };
 
 struct WhereCondition
@@ -288,12 +311,27 @@ void copyMetaInfo(MetaInfo &src, MetaInfo &dst)
     dst.CCI = src.CCI;
     dst.RSI= src.RSI;
     dst.STOCH =src.STOCH;
+    //dst.open = src.open;
+    
+    CopyBuffer(dst.buffer,0,ArraySize(src.buffer.OpenBuffer),src.buffer,false);
 }
 
 void copySRZones(SR_Zone &src, SR_Zone &dst)
 {
   dst.HighBorder=src.HighBorder;
   dst.LowBorder=src.LowBorder;
+  //ArrayCopy(dst.S,src.SR_BREAKS,0,0,WHOLE_ARRAY);
+}
+
+void copyETSignal(ETSignal &src[], ETSignal &dst[])
+{
+   ArrayFree(dst);
+   for(int i = 0; i < ArraySize(src); i++)
+   {
+       ArrayResize(dst,ArraySize(dst)+1,0);
+       copyETSignal(src[i],dst[ArraySize(dst)-1]);
+   }
+
   //ArrayCopy(dst.S,src.SR_BREAKS,0,0,WHOLE_ARRAY);
 }
 
@@ -329,7 +367,24 @@ void copyActionPattern(ActionPattern &dest, ActionPattern &source)
      dest.pos= source.pos;
      dest.Expression = source.Expression;
      dest.name = source.name;
+    
+     dest.posMethod= source.posMethod;
+     dest.posOptions=source.posOptions;
+     
+     copyETSignal(source.matchingSignal,dest.matchingSignal);
 }
 
+struct Position
+{
+  double bid;
+  double ask;
+  
+  double stopLoss;
+  double takeProfit;
+  
+  double targets[];
+  
+  double size;
+};
 
  

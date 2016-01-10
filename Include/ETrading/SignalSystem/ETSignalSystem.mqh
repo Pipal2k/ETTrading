@@ -74,6 +74,12 @@ bool DoSignalProcessing(int count) export
     
     process(barBuffers,CurrentSignals,provData,lastSignal);
     
+    for(int i = 0; i < ArraySize(CurrentSignals); i++)
+    {
+       //Print(CurrentSignals[i].time +" "+ CurrentSignals[i].metaInfo[0].
+    }
+  
+    
     if(ArraySize(CurrentSignals) > 0)
        copyETSignal(CurrentSignals[ArraySize(CurrentSignals)-1],lastSignal);
      //lastSignal = CurrentSignals[ArraySize(CurrentSignals)-1];
@@ -191,7 +197,16 @@ void PrintSignalForDebug()
            
           if(CurrentSignals[i].sig_flags & SIG_SR_BREAKTHROUGHBULLISH)
             SignalDescr+="SIG_SR_BREAKTHROUGHBULLISH ";
-        
+            
+          if(CurrentSignals[i].sig_flags & SIG_BEARISHCANDLESTICK)
+            SignalDescr+="SIG_BEARISHCANDLESTICK ";
+           
+           if(CurrentSignals[i].sig_flags & SIG_BULLISHCADLESTICK)
+            SignalDescr+="SIG_BULLISHCADLESTICK ";
+            
+           if(CurrentSignals[i].sig_flags & SIG_CS_BEARISHENGULFING)
+            SignalDescr+="SIG_CS_BEARSIHENGULFING ";
+           
         }  
         
         Print(SignalDescr);   

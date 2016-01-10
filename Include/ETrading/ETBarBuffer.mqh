@@ -19,6 +19,7 @@ datetime TimeBuffer[];
 long VolumeBuffer[];
 
 double RSIBuffer[];
+double ATRBuffer[];
 
 /*double LowBandBuffer[];
 double HighBandBuffer[];
@@ -53,7 +54,8 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
       ArraySetAsSeries(buffer.LowBandBuffer,true); */
     //if(!ArrayIsSeries(buffer.VolumeBuffer))
       ArraySetAsSeries(buffer.VolumeBuffer,asSerie);
-      ArraySetAsSeries(buffer.RSIBuffer,asSerie); 
+      ArraySetAsSeries(buffer.RSIBuffer,asSerie);
+      ArraySetAsSeries(buffer.ATRBuffer,asSerie); 
           
       
      //MA200DifPeriods ma200p;
@@ -64,6 +66,7 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
      ArrayFree(buffer.CloseBuffer);
      ArrayFree(buffer.TimeBuffer);
      ArrayFree(buffer.RSIBuffer);
+       ArrayFree(buffer.ATRBuffer);
      //ArrayFree(ma200p.CurrentMABuffer);
     // ArrayFree(ma200p.OneAboveMABuffer);
      //ArrayFree(ma200p.TwoAboveBuffer);
@@ -73,6 +76,7 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
      ArrayFree(buffer.VolumeBuffer);
       
      initRSIBuffer(buffer.RSIBuffer,timeframe,count,asSerie);
+     initATRBuffer(buffer.ATRBuffer,timeframe,count,asSerie);
      //initHighBandBuffer(shift,buffer.HighBandBuffer,timeframe);
      //initLowBandBuffer(shift,buffer.LowBandBuffer,timeframe);
      //initSTOCHBuffer(shift,buffer.STOCHBuffer,timeframe);
@@ -108,6 +112,7 @@ void CopyBuffer(Buffers &destBuffer,int start,int count,Buffers &srcBuffer, bool
    ArrayCopy(destBuffer.OpenBuffer,srcBuffer.OpenBuffer,0,start,count);
    ArrayCopy(destBuffer.TimeBuffer,srcBuffer.TimeBuffer,0,start,count);
    ArrayCopy(destBuffer.RSIBuffer,srcBuffer.RSIBuffer,0,start,count);
+   ArrayCopy(destBuffer.ATRBuffer,srcBuffer.ATRBuffer,0,start,count);
 }
 
 void initRSIBuffer(double &RSIBufferParam[], int timeframe,int count, bool asSerie)
@@ -126,3 +131,21 @@ void initRSIBuffer(double &RSIBufferParam[], int timeframe,int count, bool asSer
       
    }
 }
+
+void initATRBuffer(double &ARTRBufferParam[], int timeframe,int count, bool asSerie)
+{
+  double atr;
+ 
+   for(int i=0;i < count;i++)
+   {
+      if(asSerie)
+         atr = iATR(NULL,timeframe,14,i);
+       if(!asSerie)
+         atr =  iATR(NULL,timeframe,14,count-(i+1));
+      
+      ArrayResize(ARTRBufferParam,ArraySize(ARTRBufferParam)+1,0);
+      ARTRBufferParam[i]=atr;
+      
+   }
+}
+

@@ -9,6 +9,7 @@
 #include <ETrading/ETBarBuffer.mqh>
 #include <ETrading/ETDataTypes.mqh>
 #include <ETrading/DataProviderSystem/ETDataProviderSystem.mqh>
+#include <ETrading/SignalSystem/ETSignalCandleStick.mqh>
 //#include <ETrading/DataProviderSystem/ETIndikatorInfos.mqh>
 //+------------------------------------------------------------------+
 //| defines                                                          |
@@ -45,9 +46,9 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
       int sig=0;
       
       
-      Buffers tmpBufferONE;
+      //Buffers tmpBufferONE;
       Buffers tmpBufferThree;
-      CopyBuffer(tmpBufferONE,i,1,buffer,false);
+      CopyBuffer(mInfo.buffer,i,1,buffer,false);
       //CopyBuffer(tmpBufferThree,i,3,buffer,true);
       initBuffers(tmpBufferThree,buffer.TimeBuffer[i],3,Period(),true);
       
@@ -83,8 +84,15 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
        if(checkSIG_SR_BREAKTHROUGHBULLISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
          sig |= SIG_SR_BREAKTHROUGHBULLISH; 
          
-        if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,provData.zones,sig))
+       if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,provData.zones,sig))
          sig |= SIG_SR_TOUCHBULLISH;   
+         
+         
+        CandleStickPattern cPatterns[]; 
+        findCandleStickPattern(tmpBufferThree,cPatterns);
+        setCandleStickSignal(cPatterns,sig);
+           
+         
            
       sig |= SIG_ANY;
       
@@ -98,8 +106,12 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
          currentSIgnals[ArraySize(currentSIgnals)-1].time=buffer.TimeBuffer[i];
          
          mInfo.RSI=buffer.RSIBuffer[i];
+         //mInfo.open=buffer.OpenBuffer[i];
+         //Print(buffer.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[0]);
+         //Print(tmpBufferThree.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[2]);
+         CopyBuffer(mInfo.buffer,i,1,tmpBufferThree,false);
         
-         copyMetaInfo(mInfo,currentSIgnals[ArraySize(currentSIgnals)-1].metaInfo);
+         copyMetaInfo(mInfo,  currentSIgnals[ArraySize(currentSIgnals)-1].metaInfo);
          
          
          //currentSIgnals[ArraySize(currentSIgnals)-1].metaInfo=mIn;
@@ -109,6 +121,55 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
 }
 
 
+void setCandleStickSignal(CandleStickPattern &cPatterns[],int &signal)
+{
+
+
+bool bearishSig = false;
+bool bullishSig = false;
+
+  for(int i=0; i < ArraySize(cPatterns); i++)
+  {
+      if(cPatterns[i].Type == BearishEngulfing)
+      {
+         signal |= SIG_CS_BEARISHENGULFING;
+         bearishSig = true;
+      }
+      else if(cPatterns[i].Type == BullishEngulfing)
+      {
+         signal |= SIG_CS_BULLISHENGULFING;
+         bullishSig = true;
+      }
+      else if(cPatterns[i].Type == ThreeSoldiers)
+      {
+         signal |= SIG_CS_THREESOLDIERS; 
+         bullishSig = true;
+      }
+       else if(cPatterns[i].Type == ThreeDarkCloud)
+      {
+         signal |= SIG_CS_THREEDARKCLOUD;
+         bearishSig = true;
+      }
+       else if(cPatterns[i].Type == Hammer)
+      {
+         signal |= SIG_CS_HAMMER;
+         bullishSig = true;
+      }
+       else if(cPatterns[i].Type == InvertedHammer)
+      {
+        signal |= SIG_CS_INVERTEDHAMMER;
+         bearishSig = true;
+      }
+      
+  }
+  
+  if(bearishSig)
+   signal |= SIG_BEARISHCANDLESTICK;
+  
+  if(bullishSig)
+   signal |= SIG_BULLISHCADLESTICK; 
+   
+}
 
 
 // SIG_BARBULLISH

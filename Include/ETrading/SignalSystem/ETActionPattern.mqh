@@ -345,8 +345,15 @@ void mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
      func = iSIG_SR_TOUCHHIGHERBOUNDERY;
    else if(funcStr == "SIG_SR_TOUCHLOWERBOUNDERY")
      func = iSIG_SR_TOUCHLOWERBOUNDERY;
+   else if(funcStr == "SIG_BEARISHCANDLESTICK")
+     func = iSIG_BEARISHCANDLESTICK;
+   else if(funcStr == "SIG_BULLISHCANDLESTICK")
+     func = iSIG_BULLISHCADLESTICK;
+   else if(funcStr == "SIG_CS_BEARISHENGULFING")
+     func = iSIG_CS_BEARSIHENGULFING;       
+    
           
-      if(k==2)
+    if(k==2)
         mapOperantFuncAttribute(splitted[1],funcAttr);
      else
         mapOperantFuncAttribute("NONE",funcAttr);      
@@ -726,6 +733,12 @@ int StringToBitFlag(string flagS)
          return SIG_SR_TOUCHBEARISH;
     else if(flagS== "SIG_ANY")
          return SIG_ANY;
+    else if(flagS== "SIG_BULLISHCANDLESTICK")
+         return SIG_BULLISHCADLESTICK;
+    else if(flagS== "SIG_BEARISHCANDLESTICK")
+         return SIG_BEARISHCANDLESTICK;
+    else if(flagS== "SIG_CS_BEARISHENGULFING")
+         return SIG_CS_BEARISHENGULFING;     
                    
                
          

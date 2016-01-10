@@ -48,6 +48,7 @@ bool patternMatch(CompiledActionPattern &cAPattern, ETSignal &cSignals[],bool on
    for(int i =0; i < ArraySize(cSignals);i++) 
    {
      datetime matchingDate;
+     ETSignal matchingSignal;
      
      for(int x=0;x < ArraySize(cAPattern.compiledBarPatterns);x++)
      {
@@ -63,11 +64,18 @@ bool patternMatch(CompiledActionPattern &cAPattern, ETSignal &cSignals[],bool on
         //cAPattern.
          ArrayResize(cAPattern.actionPattern.matchingTimes,ArraySize(cAPattern.actionPattern.matchingTimes)+1,0);
          cAPattern.actionPattern.matchingTimes[ArraySize(cAPattern.actionPattern.matchingTimes)-1]= matchingDate;
+         
+         
+         copyETSignal(cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals,cAPattern.actionPattern.matchingSignal);
+        
        }
        else if(!onTime  && checkWhereConditions(cAPattern))
        {
          ArrayResize(cAPattern.actionPattern.matchingTimes,ArraySize(cAPattern.actionPattern.matchingTimes)+1,0);
          cAPattern.actionPattern.matchingTimes[ArraySize(cAPattern.actionPattern.matchingTimes)-1]= matchingDate;
+         
+         
+         copyETSignal(cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals,cAPattern.actionPattern.matchingSignal);
        }
        
      }

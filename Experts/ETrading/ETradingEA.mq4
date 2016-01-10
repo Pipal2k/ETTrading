@@ -10,6 +10,8 @@
 
 
 #include <ETrading/SignalSystem/ETSignalSystem.mqh>
+
+#include <ETrading/PositionSystem/ETPositionSystem.mqh>
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
 //+------------------------------------------------------------------+
@@ -36,6 +38,8 @@ int OnInit()
   ActionPattern actionPatterns[1];
   actionPatterns[0].pos= Sell;
   actionPatterns[0].name="TEST PATTERN";
+  actionPatterns[0].posMethod=ATR;
+  actionPatterns[0].posOptions = SingleTarget;
  // ArrayResize(actionPatterns[0].signals,1,0);
  // actionPatterns[0].signals[0] = SIG_SR_BREAKTHROUGHBEARISH;
   
@@ -51,14 +55,14 @@ int OnInit()
    // actionPatterns[0].Expression = "[(^)SIG_ANY][(1-5)SIG_SR_BREAKTHROUGHBULLISH & SIG_ANY]";
    
    //SIG_SR_TOUCHLOWERBOUNDERY
-   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BARBEARISH]"
+   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BEARISHCANDLESTICK]"
                                   +"WHERE [3].SIG_SR_TOUCHLOWERBOUNDERY.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER"; 
    
     //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBULLISH]"
      //                             +"WHERE [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER && [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [5].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER";                                  
                                   
-   //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH]";
-   //                               +"WHERE RSI > 30 ";
+   //actionPatterns[0].Expression = "[SIG_CS_BEARISHENGULFING]";
+                               // +  "WHERE RSI > 10 ";
                                   //&& RSI < 30.5";
    //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH][(^) SIG_ANY][SIG_SR_TOUCHLOWERBOUNDERY] WHERE RSI < 30.5";
    //TestCase 2 --> false
@@ -101,9 +105,18 @@ int OnInit()
    else
    {
      ActionPattern matchingPatterns[];
-      //DoSignalProcessing(2000);
-      ActionPattern matchingPattern[];
-      //getMatchingActionPatterns(matchingPattern,false);
+   //  DoSignalProcessing(1000);
+     ActionPattern matchingPattern[];
+     getMatchingActionPatterns(matchingPattern,false);
+      
+      //ActionPattern tmpActionPattern;
+     //copyActionPattern(tmpActionPattern,matchingPattern[0]);
+     //Print(tmpActionPattern.posMethod);
+     
+     ETSignal sig;
+     //copyETSignal(matchingPattern[0].matchingSignal[0],sig);
+    
+     // Print(sig.time+" "+sig.metaInfo.buffer.RSIBuffer[0]);
       return(INIT_SUCCEEDED);
     }
   }
@@ -133,7 +146,10 @@ void OnTick()
       
      
       getMatchingActionPatterns(matchingPattern,true);
+      processPositioning(matchingPattern);
+      
     } 
+    
     
     //Print(ArraySize(matchingPattern));
     //PrintOptions();
