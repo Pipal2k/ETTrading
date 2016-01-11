@@ -108,12 +108,12 @@ void calcPosATR(double ATR,ETPosition &etPos, Position pos)
       if(pos == Buy)
       {
         etPos.stopLoss = (Ask-stopLossUnits);
-        etPos.takeProfit = (Ask)+2*ATR-(Ask-Bid);
+        etPos.takeProfit = (Ask)+ATR-(Ask-Bid);
       }
       else
       {
         etPos.stopLoss = (Bid+stopLossUnits);
-        etPos.takeProfit = (Bid)-2*ATR+(Ask-Bid);
+        etPos.takeProfit = (Bid)-ATR+(Ask-Bid);
       }
        
    

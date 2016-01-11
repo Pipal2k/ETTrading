@@ -76,33 +76,33 @@ void calculatePivot(SR_Row &rows[], int timeframe, PivotKind kind) export
      calculateFibonacciPivot(pivot,timeframe);
   
   
-  tmpRows[0].type=DPivot;
+  tmpRows[0].type=(DPivot | RESISTANCE | SUPPORT);
   tmpRows[0].Prize=pivot.DPivot;
-  tmpRows[1].type=R1;
+  tmpRows[1].type=(R1 | RESISTANCE);
   tmpRows[1].Prize=pivot.R1;
-  tmpRows[2].type=R2;
+  tmpRows[2].type=(R2 | RESISTANCE);
   tmpRows[2].Prize=pivot.R2;
-  tmpRows[3].type=R3;
+  tmpRows[3].type=(R3 | RESISTANCE);
   tmpRows[3].Prize=pivot.R3;
-  tmpRows[4].type=MR1;
+  tmpRows[4].type=(MR1 | RESISTANCE | MIDPIVOT);
   tmpRows[4].Prize=pivot.MR1;
-  tmpRows[5].type=MR2;
+  tmpRows[5].type=(MR2 | RESISTANCE | MIDPIVOT);
   tmpRows[5].Prize=pivot.MR2;
-  tmpRows[6].type=MR3;  
+  tmpRows[6].type=(MR3 | RESISTANCE | MIDPIVOT);  
   tmpRows[6].Prize=pivot.MR3; 
-  tmpRows[7].type=S1;
+  tmpRows[7].type=(S1 | SUPPORT);
   tmpRows[7].Prize=pivot.S1;
-  tmpRows[8].type=S2;
+  tmpRows[8].type=(S2 | SUPPORT);
   tmpRows[8].Prize=pivot.S2;
-  tmpRows[9].type=S3;
+  tmpRows[9].type=(S3 | SUPPORT);
   tmpRows[9].Prize=pivot.S3;
-  tmpRows[10].type=MS1;
+  tmpRows[10].type=(MS1 | SUPPORT | MIDPIVOT);
   tmpRows[10].Prize=pivot.MS1;
-  tmpRows[11].type=MS2;
+  tmpRows[11].type=(MS2 | SUPPORT | MIDPIVOT);
   tmpRows[11].Prize=pivot.MS2;
-  tmpRows[12].type=MS3;
+  tmpRows[12].type=(MS3 | SUPPORT | MIDPIVOT);
   tmpRows[12].Prize=pivot.MS3; 
-  tmpRows[13].type=WPivot;
+  tmpRows[13].type=(WPivot | SUPPORT | RESISTANCE);
   tmpRows[13].Prize=pivot.WPivot; 
   
   //ArrayResize(rows,ArraySize(rows)+14,0);

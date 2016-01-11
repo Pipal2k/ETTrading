@@ -54,14 +54,15 @@ enum DataProviderSys_Options
    KEYLEVELS =0x04,
 };
 
-enum SR_Find_Options
+enum SignalSys_Options
 {
    //PIVOT = 0x01,
    //FPIVOT = 0x02,
    //KEYLEVELS =0x04,
    DRAW_SR_ROWS= 0x08,
    DRAW_SR_MID_PIVOTS = 0x10,
-   DEBUG_SIGNALS = 0x20
+   DEBUG_SIGNALS = 0x20,
+   USE_MIDPIVOTS =0x40
 };
 
 enum FlagOperator
@@ -136,32 +137,43 @@ Fibo
 
 enum RowType
 {
-   DPivot,
-   WPivot,
-   MR1,
-   R1,
-   MR2,
-   R2,
-   MR3,
-   R3,
-   MS1,
-   S1,
-   MS2,
-   S2,
-   MS3,
-   S3
+   DPivot =0x01,
+   WPivot = 0x02,
+   MR1 = 0x04,
+   R1= 0x08,
+   MR2= 0x10,
+   R2=0x20,
+   MR3=0x40,
+   R3=0x80,
+   MS1=0x100,
+   S1=0x200,
+   MS2=0x400,
+   S2=0x800,
+   MS3=0x1000,
+   S3=0x2000,
+   RESISTANCE = 0x4000,
+   SUPPORT= 0x8000,
+   MIDPIVOT=0x10000
 };
+
+
 
 struct SR_Row
 {
-  RowType type;
+  int type; //RowTypeFlags
   double Prize;
+  
+  
 };
+
+
 
 struct SR_Zone
 {
  double HighBorder;
  double LowBorder;
+ 
+ int SRType;
 };
 
 struct MetaInfo
@@ -320,6 +332,7 @@ void copySRZones(SR_Zone &src, SR_Zone &dst)
 {
   dst.HighBorder=src.HighBorder;
   dst.LowBorder=src.LowBorder;
+  dst.SRType = src.SRType;
   //ArrayCopy(dst.S,src.SR_BREAKS,0,0,WHOLE_ARRAY);
 }
 

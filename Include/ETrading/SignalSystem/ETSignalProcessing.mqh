@@ -32,7 +32,7 @@
 // #import
 //+------------------------------------------------------------------+
 
-void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal)
+void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal, int SignalSystemOptions)
 {
    ArrayFree(currentSIgnals);
    
@@ -68,23 +68,23 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
          sig |= SIG_BARBEARISH; 
        
 
-       if(checkSIG_SR_TOUCHLOWERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_TOUCHLOWERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo,SignalSystemOptions))
            sig |= SIG_SR_TOUCHLOWERBOUNDERY;
          
-        if(checkSIG_SR_TOUCHHIGHERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
+        if(checkSIG_SR_TOUCHHIGHERBOUNDERY(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo,SignalSystemOptions))
            sig |= SIG_SR_TOUCHHIGHERBOUNDERY;
              
-       if(checkSIG_SR_BREAKTHROUGHBEARISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_BREAKTHROUGHBEARISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo,SignalSystemOptions))
          sig |= SIG_SR_BREAKTHROUGHBEARISH;
        //}    
          
-       if(checkSIG_SR_TOUCHBEARISH(tmpBufferThree,provData.zones,sig))
+       if(checkSIG_SR_TOUCHBEARISH(tmpBufferThree,provData.zones,sig,SignalSystemOptions))
          sig |= SIG_SR_TOUCHBEARISH;
          
-       if(checkSIG_SR_BREAKTHROUGHBULLISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo))
+       if(checkSIG_SR_BREAKTHROUGHBULLISH(tmpBufferThree,provData.zones,sig,mInfo,lastMetaInfo,SignalSystemOptions))
          sig |= SIG_SR_BREAKTHROUGHBULLISH; 
          
-       if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,provData.zones,sig))
+       if(checkSIG_SR_TOUCHBULLISH(tmpBufferThree,provData.zones,sig,SignalSystemOptions))
          sig |= SIG_SR_TOUCHBULLISH;   
          
          
@@ -194,7 +194,7 @@ bool checkSIG_BARBEARSIH(Buffers &buffer)
    return result;   
 }
 
-bool checkSIG_SR_TOUCHLOWERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo)
+bool checkSIG_SR_TOUCHLOWERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo,int SignalSystemOptions)
 {
   bool result = false;
   
@@ -218,7 +218,7 @@ bool checkSIG_SR_TOUCHLOWERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, Me
   return result;
 }
 
-bool checkSIG_SR_TOUCHHIGHERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo)
+bool checkSIG_SR_TOUCHHIGHERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo,int SignalSystemOptions)
 {
   bool result = false;
   
@@ -239,7 +239,7 @@ bool checkSIG_SR_TOUCHHIGHERBOUNDERY(Buffers &buffer,SR_Zone &zones[],int sig, M
   return result;
 }
 
-bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo)
+bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo,int SignalSystemOptions)
 {
   bool result = false;
   
@@ -247,26 +247,24 @@ bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, M
   {
    for(int i = 0; i < ArraySize(zones); i++)
    {
-   
-     if( ((buffer.OpenBuffer[1] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point))
-        || (buffer.OpenBuffer[0] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point)))
-        && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBEARISH))
-      {
+     if( ((zones[i].SRType & MIDPIVOT) && (SignalSystemOptions & USE_MIDPIVOTS)) || (!(zones[i].SRType & MIDPIVOT)))
+     {   
         
-         ArrayResize(Info.iSIG_SR_BREAKTHROUGHBEARISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)+1,0);
-         //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
-         Info.iSIG_SR_BREAKTHROUGHBEARISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)-1]= zones[i];
-         
-         result=true;
-       break;
-      }
+        if( ((buffer.OpenBuffer[1] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point))
+           || (buffer.OpenBuffer[0] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point)))
+           && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBEARISH))
+         {
+           
+            ArrayResize(Info.iSIG_SR_BREAKTHROUGHBEARISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)+1,0);
+            //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
+            Info.iSIG_SR_BREAKTHROUGHBEARISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)-1]= zones[i];
+            
+            result=true;
+            break;
+         }
+     }
      
-    
-     //if(buffer.OpenBuffer[0] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder)
-     //{
-     //  result=true;
-     //  break;
-     //}
+   
   
    }
   }
@@ -274,6 +272,39 @@ bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, M
   return result;
 
 }
+
+/*bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, MetaInfo &Info, MetaInfo &lastInfo,int SignalSystemOptions)
+{
+  bool result = false;
+  
+  if(sig & SIG_BARBEARISH)
+  {
+   for(int i = 0; i < ArraySize(zones); i++)
+   {
+     
+        
+        if( ((buffer.OpenBuffer[1] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point))
+           || (buffer.OpenBuffer[0] > zones[i].LowBorder && buffer.CloseBuffer[0] < zones[i].LowBorder -(20*Point)))
+           && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBEARISH))
+         {
+           
+            ArrayResize(Info.iSIG_SR_BREAKTHROUGHBEARISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)+1,0);
+            //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
+            Info.iSIG_SR_BREAKTHROUGHBEARISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)-1]= zones[i];
+            
+            result=true;
+            break;
+         }
+     
+     
+  
+   }
+   }
+  
+  
+  return result;
+
+}*/
 
 bool notHitSRLastTime(SR_Zone &hit, SR_Zone &lastZones[])
 {
@@ -290,7 +321,7 @@ bool notHitSRLastTime(SR_Zone &hit, SR_Zone &lastZones[])
   
 }
 
-bool checkSIG_SR_TOUCHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig)
+bool checkSIG_SR_TOUCHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig,int SignalSystemOptions)
 {
   bool result = false;
   
@@ -311,7 +342,7 @@ bool checkSIG_SR_TOUCHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig)
 
 }
 
-bool checkSIG_SR_BREAKTHROUGHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig,MetaInfo &Info, MetaInfo &lastInfo)
+bool checkSIG_SR_BREAKTHROUGHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig,MetaInfo &Info, MetaInfo &lastInfo,int SignalSystemOptions)
 {
   bool result = false;
   
@@ -337,7 +368,7 @@ bool checkSIG_SR_BREAKTHROUGHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig,Me
 
 }
 
-bool checkSIG_SR_TOUCHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig)
+bool checkSIG_SR_TOUCHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig,int SignalSystemOptions)
 {
   bool result = false;
   

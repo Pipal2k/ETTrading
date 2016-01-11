@@ -32,7 +32,7 @@ int OnInit()
   //int ETSSoption = (PIVOT | FPIVOT | DRAW_SR_ROWS | DRAW_SR_MID_PIVOTS | DEBUG_SIGNALS) ;
   
   int ETDPOption = ( PIVOT );
-  int ETSSoption = ( DRAW_SR_ROWS   | DRAW_SR_MID_PIVOTS  ) ;
+  int ETSSoption = ( DRAW_SR_ROWS  | DRAW_SR_MID_PIVOTS |  USE_MIDPIVOTS ) ;
  
   //Define ActionPattern
   ActionPattern actionPatterns[1];
@@ -55,8 +55,8 @@ int OnInit()
    // actionPatterns[0].Expression = "[(^)SIG_ANY][(1-5)SIG_SR_BREAKTHROUGHBULLISH & SIG_ANY]";
    
    //SIG_SR_TOUCHLOWERBOUNDERY
-   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BEARISHCANDLESTICK]"
-                                  +"WHERE [3].SIG_SR_TOUCHLOWERBOUNDERY.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER"; 
+   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BARBEARISH]";
+                                 +"WHERE [3].SIG_SR_TOUCHLOWERBOUNDERY.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER";//&& RSI > 60"; 
    
     //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBULLISH]"
      //                             +"WHERE [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER && [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [5].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER";                                  
@@ -105,9 +105,9 @@ int OnInit()
    else
    {
      ActionPattern matchingPatterns[];
-     //DoSignalProcessing(1000);
+     DoSignalProcessing(1000);
      ActionPattern matchingPattern[];
-     //getMatchingActionPatterns(matchingPattern,false);
+     getMatchingActionPatterns(matchingPattern,false);
       
       //ActionPattern tmpActionPattern;
      //copyActionPattern(tmpActionPattern,matchingPattern[0]);

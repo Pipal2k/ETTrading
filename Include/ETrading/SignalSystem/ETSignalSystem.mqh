@@ -72,7 +72,7 @@ bool DoSignalProcessing(int count) export
    //  Print("RSI AT: "+barBuffers.TimeBuffer[i]+" "+barBuffers.RSIBuffer[i]);
    // }
     
-    process(barBuffers,CurrentSignals,provData,lastSignal);
+    process(barBuffers,CurrentSignals,provData,lastSignal,SignalSystemOptions);
     
     for(int i = 0; i < ArraySize(CurrentSignals); i++)
     {
@@ -143,26 +143,26 @@ void DrawSRRows(SR_Row &pivotRow[],bool drawMidPivots) export
   for(int i = 0; i < ArraySize(pivotRow);i++)
   {
   
-  if(pivotRow[i].type != MR1 && pivotRow[i].type != MR2 && pivotRow[i].type != MR3 && pivotRow[i].type != MS1 && pivotRow[i].type != MS2 && pivotRow[i].type != MS3 )
-   ObjectCreate(EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize), OBJ_HLINE, 0, Time[0],pivotRow[i].Prize, 0, 0);
+  if(!(pivotRow[i].type & MIDPIVOT) )
+   ObjectCreate("SR"+DoubleToString(pivotRow[i].Prize), OBJ_HLINE, 0, Time[0],pivotRow[i].Prize, 0, 0);
    
-   if(drawMidPivots && (pivotRow[i].type == MR1 || pivotRow[i].type == MR2 || pivotRow[i].type == MR3 || pivotRow[i].type == MS1 || pivotRow[i].type == MS2 || pivotRow[i].type == MS3 ))
-   ObjectCreate(EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize), OBJ_HLINE, 0, Time[0],pivotRow[i].Prize, 0, 0);
+   if(drawMidPivots && (pivotRow[i].type & MIDPIVOT))
+   ObjectCreate("SR"+DoubleToString(pivotRow[i].Prize), OBJ_HLINE, 0, Time[0],pivotRow[i].Prize, 0, 0);
    
-   if(pivotRow[i].type == DPivot)
-   ObjectSetInteger(0,EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Blue);
+   if(pivotRow[i].type & DPivot)
+   ObjectSetInteger(0,"SR"+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Blue);
    
-    if(pivotRow[i].type == WPivot)
-   ObjectSetInteger(0,EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Black);
+    if(pivotRow[i].type & WPivot)
+   ObjectSetInteger(0,"SR"+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Black);
   
-  if(pivotRow[i].type == R1 || pivotRow[i].type == R2 || pivotRow[i].type == R3)
-  ObjectSetInteger(0,EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Red);
+  if(pivotRow[i].type & R1 || pivotRow[i].type & R2 || pivotRow[i].type & R3)
+  ObjectSetInteger(0,"SR"+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Red);
   
-  if(pivotRow[i].type == S1 || pivotRow[i].type == S2 || pivotRow[i].type == S3)
-  ObjectSetInteger(0,EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Green);
+  if(pivotRow[i].type & S1 || pivotRow[i].type & S2 || pivotRow[i].type & S3)
+  ObjectSetInteger(0,"SR"+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Green);
   
-  if(drawMidPivots && (pivotRow[i].type == MR1 || pivotRow[i].type == MR2 || pivotRow[i].type == MR3 || pivotRow[i].type == MS1 || pivotRow[i].type == MS2 || pivotRow[i].type == MS3 ))
-  ObjectSetInteger(0,EnumToString(pivotRow[i].type)+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Gray);
+  if(drawMidPivots && (pivotRow[i].type & MR1 || pivotRow[i].type & MR2 || pivotRow[i].type & MR3 || pivotRow[i].type & MS1 || pivotRow[i].type & MS2 || pivotRow[i].type & MS3 ))
+  ObjectSetInteger(0,"SR"+DoubleToString(pivotRow[i].Prize),OBJPROP_COLOR,Gray);
   }
 }
 

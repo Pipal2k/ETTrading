@@ -74,6 +74,8 @@ void RowsToZones(SR_Zone &destZones[], SR_Row &rows[])
      ArrayResize(destZones, ArraySize(destZones)+1,0);
      destZones[ArraySize(destZones)-1].HighBorder= rows[i].Prize;
      destZones[ArraySize(destZones)-1].LowBorder= rows[i].Prize;
+     
+     destZones[ArraySize(destZones)-1].SRType =rows[i].type;
    }
 
 }
