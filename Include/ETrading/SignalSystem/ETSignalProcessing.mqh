@@ -350,16 +350,20 @@ bool checkSIG_SR_BREAKTHROUGHBULLISH(Buffers &buffer,SR_Zone &zones[],int sig,Me
   {
    for(int i = 0; i < ArraySize(zones); i++)
    {
-     if(((buffer.OpenBuffer[0] < zones[i].HighBorder && buffer.CloseBuffer[0] > zones[i].HighBorder + (20*Point))
-         || (buffer.OpenBuffer[1] < zones[i].HighBorder && buffer.CloseBuffer[0] > zones[i].HighBorder + (20*Point)))
-         && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBULLISH))
-     {
-       ArrayResize(Info.iSIG_SR_BREAKTHROUGHBULLISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBULLISH)+1,0);
-         //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
-         Info.iSIG_SR_BREAKTHROUGHBULLISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBULLISH)-1]= zones[i];
-       result=true;
-       break;
-     }
+   
+     if( ((zones[i].SRType & MIDPIVOT) && (SignalSystemOptions & USE_MIDPIVOTS)) || (!(zones[i].SRType & MIDPIVOT)))
+     {      
+         if(((buffer.OpenBuffer[0] < zones[i].HighBorder && buffer.CloseBuffer[0] > zones[i].HighBorder + (20*Point))
+            || (buffer.OpenBuffer[1] < zones[i].HighBorder && buffer.CloseBuffer[0] > zones[i].HighBorder + (20*Point)))
+            && !notHitSRLastTime(zones[i],lastInfo.iSIG_SR_BREAKTHROUGHBULLISH))
+        {
+          ArrayResize(Info.iSIG_SR_BREAKTHROUGHBULLISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBULLISH)+1,0);
+            //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
+            Info.iSIG_SR_BREAKTHROUGHBULLISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBULLISH)-1]= zones[i];
+          result=true;
+          break;
+        }
+      }  
   
    }
   }

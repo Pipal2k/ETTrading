@@ -31,6 +31,7 @@
 // #import
 //+------------------------------------------------------------------+
 
+ETPosition currentPos;  
 void processPositioning(ActionPattern &matchingPattern[])
 {
       
@@ -41,9 +42,9 @@ void processPositioning(ActionPattern &matchingPattern[])
         {
            if(!checkParadoxumPatterns(matchingPattern))
            {
-               ETPosition pos;
-               calculatePosition(matchingPattern[0],pos);
                
+               calculatePosition(matchingPattern[0],currentPos);
+               OpenPosition(currentPos,matchingPattern[0].pos);
                
            }
         }
@@ -54,7 +55,25 @@ void processPositioning(ActionPattern &matchingPattern[])
       else
       {
         //Position bereits offen eventuell schließen und next target
-        
+        /*if(currentPos.pos == Buy && ((Bid >= currentPos.targets[0] && currentPos.targetsHit == 0) ||  (Bid >= currentPos.targets[1] && currentPos.targetsHit == 1)))
+        {
+           double lotSizeToClose = currentPos.size /2.0;
+           
+           
+          
+           Print(lotSizeToClose); 
+            
+           OrderClose(OrderMagicNumber(),lotSizeToClose,Bid,3,Red);
+           currentPos.targetsHit +=1;
+           currentPos.orderid+=2;
+           
+        }
+        else if(currentPos.pos == Sell && (Bid <= currentPos.targets[0] || Bid <= currentPos.targets[1]))
+        {
+           double lotSizeToClose = currentPos.openSize /2;
+           currentPos.openSize -= lotSizeToClose;
+           OrderClose(currentPos.orderid,lotSizeToClose,Bid,3,Red);
+        }*/ 
         
       }
 }
@@ -67,9 +86,10 @@ void calculatePosition(ActionPattern &matchingPattern,ETPosition &etPos)
       //Print("MatchinSignal Count: "+ matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0]);
       calcPosATR(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0] ,etPos,matchingPattern.pos);
       
-      etPos.size = calculatePositionGroesse(etPos.stopLossUnits,AccountEquity());
       
-      OpenPosition(etPos,matchingPattern.pos);
+      etPos.size = calculatePositionGroesse(etPos.stopLossUnits,AccountEquity());
+      //etPos.openSize = etPos.size;
+      
      // double calculateStopLossPrize(Position pos, double atr, double &stopLossUnits)
   
      //double atr=iATR(NULL,0,14,0);
@@ -107,13 +127,24 @@ void calcPosATR(double ATR,ETPosition &etPos, Position pos)
      
       if(pos == Buy)
       {
+        etPos.pos = Buy;
         etPos.stopLoss = (Ask-stopLossUnits);
-        etPos.takeProfit = (Ask)+ATR-(Ask-Bid);
+        ArrayResize(etPos.targets, 2,0);
+        
+        etPos.targets[0] = (Ask)+(1*ATR)-(Ask-Bid);
+        etPos.targets[1] = (Ask)+(2*ATR)-(Ask-Bid);
+        etPos.targetsHit=0;
+        etPos.takeProfit = (Ask)+(4*ATR)-(Ask-Bid);
       }
       else
       {
+        etPos.pos = Sell;
         etPos.stopLoss = (Bid+stopLossUnits);
-        etPos.takeProfit = (Bid)-ATR+(Ask-Bid);
+        ArrayResize(etPos.targets, 2,0);
+        etPos.targetsHit=0;
+        etPos.targets[0] = (Bid)-(1*ATR)+(Ask-Bid);
+        etPos.targets[1] = (Bid)-(2*ATR)+(Ask-Bid);
+        etPos.takeProfit = (Bid)-(3*ATR)+(Ask-Bid);
       }
        
    
@@ -158,7 +189,8 @@ bool checkParadoxumPatterns(ActionPattern &matchingPattern[])
    if(buys>0) return(buys);
    else       return(-sells);
   }
-  
+ 
+
   
 void OpenPosition(ETPosition &etPos,Position pos)
 {
@@ -169,13 +201,16 @@ void OpenPosition(ETPosition &etPos,Position pos)
             
         
         //int res=OrderSend(Symbol(),OP_SELL,positionGr,Bid,3,stpl,Bid-takeprofit,"",MAGICMA,0,Red);
-        int res=OrderSend(Symbol(),OP_SELL,etPos.size,Bid,3,etPos.stopLoss,etPos.takeProfit,"",MAGICMA,0,Red);
-         if(res<0)
+        etPos.orderid=OrderSend(Symbol(),OP_SELL,etPos.size,Bid,3,etPos.stopLoss,etPos.takeProfit,"",MAGICMA,0,Red);
+         if(etPos.orderid<0)
            {
             Print("OrderSend failed with error #",GetLastError());
            }
          else
+         {
+            
             Print("OrderSend placed successfully");
+          }
 
          return;
 
@@ -184,8 +219,8 @@ void OpenPosition(ETPosition &etPos,Position pos)
         {
          //openLong();
          //int res=OrderSend(Symbol(),OP_BUY,positionGr,Ask,3,stpl,Ask+takeprofit,"",MAGICMA,0,Blue);
-         int res=OrderSend(Symbol(),OP_BUY,etPos.size,Ask,3,etPos.stopLoss,etPos.takeProfit,"",MAGICMA,0,Blue);
-         if(res<0)
+          etPos.orderid=OrderSend(Symbol(),OP_BUY,etPos.size,Ask,3,etPos.stopLoss,etPos.takeProfit,"",MAGICMA,0,Blue);
+         if(etPos.orderid<0)
            {
             Print("OrderSend failed with error #",GetLastError());
            }

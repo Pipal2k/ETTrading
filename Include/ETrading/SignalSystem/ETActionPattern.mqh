@@ -166,6 +166,7 @@ void parseWhereTerm(uchar &exp_chars[], int index, WhereCondition &wCond, int Op
      {
        parseValueWhereOperant(exp_chars,index,wCond,OperantCount);
      }
+     
      else 
      {
          parseFuncWhereOperant(exp_chars,index,wCond,OperantCount);
@@ -243,6 +244,8 @@ void parseFuncWhereOperant(uchar &exp_chars[], int index,WhereCondition &wCond,i
    string tmpFunc =  StringTrimRight(StringTrimLeft(CharArrayToString(charBuffer,0,WHOLE_ARRAY,CP_ACP)));
     StringToUpper(tmpFunc);
     
+   
+   
    if(OperantCount == 1)
    {
       wCond.Operant1Typ = FUNKTIONOPERANT;
@@ -321,7 +324,7 @@ void parseOperantFunc(uchar &exp_chars[], int index,WhereCondition &wCond,int Op
      parseWhereTerm(exp_chars,index+1,wCond,OperantCount+1); 
 }
 
-void mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttribute &funcAttr)
+bool mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttribute &funcAttr)
 {
     
    string splitted[];
@@ -350,13 +353,18 @@ void mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
    else if(funcStr == "SIG_BULLISHCANDLESTICK")
      func = iSIG_BULLISHCADLESTICK;
    else if(funcStr == "SIG_CS_BEARISHENGULFING")
-     func = iSIG_CS_BEARSIHENGULFING;       
+     func = iSIG_CS_BEARSIHENGULFING;         
     
           
     if(k==2)
         mapOperantFuncAttribute(splitted[1],funcAttr);
      else
         mapOperantFuncAttribute("NONE",funcAttr);      
+        
+     if(func!= 0)
+      return true;
+      
+ return false;        
 }
 
 void mapOperantFuncAttribute(string funcAttrStr, WhereOperantFuncAttribute &funcAttr)
@@ -365,8 +373,10 @@ void mapOperantFuncAttribute(string funcAttrStr, WhereOperantFuncAttribute &func
 
    if(funcAttrStr == "HIGHBORDER" || funcAttrStr == "HIGH")
      funcAttr = HIGHBORDER;
-   if(funcAttrStr == "LOWBORDER" || funcAttrStr == "LOW")
+   else if(funcAttrStr == "LOWBORDER" || funcAttrStr == "LOW")
      funcAttr = LOWBORDER;  
+    if(funcAttrStr == "TYPE")
+     funcAttr = TYPE;  
    else 
      funcAttr =NONE;
 }

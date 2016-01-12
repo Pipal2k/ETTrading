@@ -262,7 +262,8 @@ enum WhereOperantFuncAttribute
 {
    NONE,
    LOWBORDER,
-   HIGHBORDER
+   HIGHBORDER,
+   TYPE
 };
 
 
@@ -277,7 +278,8 @@ enum WhereOperantFunc
    iSIG_SR_TOUCHLOWERBOUNDERY,
    iSIG_BEARISHCANDLESTICK,
    iSIG_BULLISHCADLESTICK,
-   iSIG_CS_BEARSIHENGULFING
+   iSIG_CS_BEARSIHENGULFING,
+   iSR_R1
 };
 
 struct WhereCondition
@@ -398,8 +400,14 @@ struct ETPosition
   double takeProfit;
   
   double targets[];
+  int targetsHit;
   
   double size;
+  double openSize;
+  
+  Position pos;
+  
+  int orderid;
 };
 
  

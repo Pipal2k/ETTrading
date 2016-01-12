@@ -383,6 +383,7 @@ bool isWhereCondTrue(double &op1[], double &op2[], string Operator)
                  {
                      if(op1[i]== op2[x])
                      {
+                        
                         condition = true;
                         break;
                      }
@@ -450,6 +451,11 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
                  results[ArraySize(results)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].LowBorder;
               }
               else if(funcAtrr == HIGHBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].HighBorder;
+              }
+               else if(funcAtrr == TYPE)
               {
                  ArrayResize(results,ArraySize(results)+1,0);
                  results[ArraySize(results)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].HighBorder;
@@ -536,6 +542,10 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
               }
          }
        return 1;
+    }
+    else if(func==iSR_R1)
+    {
+    
     }
     
     
