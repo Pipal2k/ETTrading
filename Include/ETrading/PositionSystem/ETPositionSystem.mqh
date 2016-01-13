@@ -54,26 +54,96 @@ void processPositioning(ActionPattern &matchingPattern[])
       }
       else
       {
+      
+          if(currentPos.targetsHit < ArraySize(currentPos.targets))
+          {
+              if(currentPos.pos == Buy)
+              {
+                    if(Bid >= currentPos.targets[currentPos.targetsHit])
+                    {
+                      double lotSizeToClose = NormalizeDouble(currentPos.size / 2.0,1);
+                      OrderModify(OrderTicket(), OrderOpenPrice(), Bid-(currentPos.stopLossUnits*1.5), OrderTakeProfit(), Red);
+                      OrderClose(OrderTicket(),lotSizeToClose,Bid,3,Red);
+                      
+                      
+                      currentPos.targetsHit +=1;
+                      currentPos.size = currentPos.size-lotSizeToClose;
+                    }
+              }
+               if(currentPos.pos == Sell)
+              {
+                    if(Bid <= currentPos.targets[currentPos.targetsHit])
+                    {
+                      double lotSizeToClose = NormalizeDouble(currentPos.size / 2.0,1);
+                      OrderModify(OrderTicket(), OrderOpenPrice(), Bid+(currentPos.stopLossUnits*1.5), OrderTakeProfit(), Red);
+                      OrderClose(OrderTicket(),lotSizeToClose,Ask,3,Red);
+                      
+                      
+                      currentPos.targetsHit +=1;
+                      currentPos.size = currentPos.size-lotSizeToClose;
+                    }
+              }
+          }
         //Position bereits offen eventuell schließen und next target
-        /*if(currentPos.pos == Buy && ((Bid >= currentPos.targets[0] && currentPos.targetsHit == 0) ||  (Bid >= currentPos.targets[1] && currentPos.targetsHit == 1)))
+        /*if( (currentPos.pos == Buy && ((Bid >= currentPos.targets[0] && currentPos.targetsHit == 0) ||  (Bid >= currentPos.targets[1] && currentPos.targetsHit == 1))) )
         {
-           double lotSizeToClose = currentPos.size /2.0;
+           double lotSizeToClose = NormalizeDouble(currentPos.size / 2.0,1);
            
+           
+           int Ticket=OrderTicket(); 
            
           
-           Print(lotSizeToClose); 
+           
             
-           OrderClose(OrderMagicNumber(),lotSizeToClose,Bid,3,Red);
-           currentPos.targetsHit +=1;
-           currentPos.orderid+=2;
+            if ((Bid >= currentPos.targets[0]) &&currentPos.targetsHit==0)
+            {
+               OrderModify(Ticket, OrderOpenPrice(), OrderOpenPrice(), OrderTakeProfit(), Red);
+               OrderClose(Ticket,lotSizeToClose,Bid,3,Red);
+                
+
+               currentPos.targetsHit +=1;
+               currentPos.size = currentPos.size-lotSizeToClose;
+            }
+            else if ((Bid >= currentPos.targets[1]) && currentPos.targetsHit==1)
+            {
+                 //OrderModify(Ticket, OrderOpenPrice(), currentPos.targets[0], OrderTakeProfit(), Red);
+                 OrderClose(Ticket,lotSizeToClose,Bid,3,Red);
+                 currentPos.targetsHit +=1;
+                 currentPos.size = currentPos.size-lotSizeToClose;
+            }
+                 
+           
+          // currentPos.orderid+=2;
            
         }
-        else if(currentPos.pos == Sell && (Bid <= currentPos.targets[0] || Bid <= currentPos.targets[1]))
+        else if(currentPos.pos == Sell && ((Bid <= currentPos.targets[0] && currentPos.targetsHit == 0) || (Bid <= currentPos.targets[1] && currentPos.targetsHit == 1)))
         {
-           double lotSizeToClose = currentPos.openSize /2;
-           currentPos.openSize -= lotSizeToClose;
-           OrderClose(currentPos.orderid,lotSizeToClose,Bid,3,Red);
-        }*/ 
+          double lotSizeToClose = NormalizeDouble(currentPos.size / 2.0,1);
+           
+           
+           int Ticket=OrderTicket(); 
+           
+           if(Bid <= currentPos.targets[0] && currentPos.targetsHit == 0)
+           {
+              
+               OrderClose(Ticket,lotSizeToClose,Ask,3,Red);
+               OrderModify(Ticket, OrderOpenPrice(), OrderOpenPrice(), OrderTakeProfit(), Red);  
+
+               currentPos.targetsHit +=1;
+               currentPos.size = currentPos.size-lotSizeToClose;
+            
+           }
+            else if (Bid <= currentPos.targets[1] && currentPos.targetsHit == 1)
+            {
+                //OrderModify(Ticket, OrderOpenPrice(), currentPos.targets[0], OrderTakeProfit(), Red);
+                 OrderClose(Ticket,lotSizeToClose,Ask,3,Red);
+                 currentPos.targetsHit +=1;
+                 currentPos.size = currentPos.size-lotSizeToClose;
+            }
+           
+          //currentPos.openSize -= lotSizeToClose;
+          // OrderClose(currentPos.orderid,lotSizeToClose,Bid,3,Red);
+        } */
         
       }
 }
@@ -122,29 +192,37 @@ double calculatePositionGroesse(double stopLossUnits, double Amount)
 void calcPosATR(double ATR,ETPosition &etPos, Position pos)
 {
    //Print("ATR :" +ATR);
-   double stopLossUnits = ATR*2.0;
-   etPos.stopLossUnits= stopLossUnits;
+       etPos.stopLossUnits = ATR*2.0;
+   //etPos.stopLossUnits= stopLossUnits;
      
       if(pos == Buy)
       {
         etPos.pos = Buy;
-        etPos.stopLoss = (Ask-stopLossUnits);
-        ArrayResize(etPos.targets, 2,0);
+        etPos.stopLoss = (Ask-etPos.stopLossUnits);
+        ArrayResize(etPos.targets, 6,0);
         
         etPos.targets[0] = (Ask)+(1*ATR)-(Ask-Bid);
         etPos.targets[1] = (Ask)+(2*ATR)-(Ask-Bid);
+        etPos.targets[2] = (Ask)+(3*ATR)-(Ask-Bid);
+        etPos.targets[3] = (Ask)+(4*ATR)-(Ask-Bid);
+         etPos.targets[4] = (Ask)+(5*ATR)-(Ask-Bid);
+         etPos.targets[5] = (Ask)+(6*ATR)-(Ask-Bid);
         etPos.targetsHit=0;
-        etPos.takeProfit = (Ask)+(4*ATR)-(Ask-Bid);
+        etPos.takeProfit = (Ask)+(7*ATR)-(Ask-Bid);
       }
       else
       {
         etPos.pos = Sell;
-        etPos.stopLoss = (Bid+stopLossUnits);
-        ArrayResize(etPos.targets, 2,0);
+        etPos.stopLoss = (Bid+etPos.stopLossUnits);
+        ArrayResize(etPos.targets, 6,0);
         etPos.targetsHit=0;
         etPos.targets[0] = (Bid)-(1*ATR)+(Ask-Bid);
         etPos.targets[1] = (Bid)-(2*ATR)+(Ask-Bid);
-        etPos.takeProfit = (Bid)-(3*ATR)+(Ask-Bid);
+        etPos.targets[2] = (Bid)-(3*ATR)+(Ask-Bid);
+        etPos.targets[3] = (Bid)-(4*ATR)+(Ask-Bid);
+        etPos.targets[4] = (Bid)-(5*ATR)+(Ask-Bid);
+        etPos.targets[5] = (Bid)-(6*ATR)+(Ask-Bid);
+        etPos.takeProfit = (Bid)-(7*ATR)+(Ask-Bid);
       }
        
    
