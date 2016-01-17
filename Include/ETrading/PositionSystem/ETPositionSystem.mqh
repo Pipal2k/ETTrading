@@ -152,22 +152,14 @@ void calculatePosition(ActionPattern &matchingPattern,ETPosition &etPos)
 {
    
    if(matchingPattern.posMethod == ATR)
-   {
-      //Print("MatchinSignal Count: "+ matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0]);
-      calcPosATR(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0] ,etPos,matchingPattern.pos);
-      
-      
+   {  
+      calcPosATR(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],etPos,matchingPattern.pos,(matchingPattern.posOptions & SingleTarget));
       etPos.size = calculatePositionGroesse(etPos.stopLossUnits,AccountEquity());
-      //etPos.openSize = etPos.size;
       
-     // double calculateStopLossPrize(Position pos, double atr, double &stopLossUnits)
-  
-     //double atr=iATR(NULL,0,14,0);
-      
-      
-  
-  
-      
+   }
+   else if(matchingPattern.posMethod == SRZONES)
+   {
+        Print("Prepared Data Zones Count: "+ ArraySize(matchingPattern.prepData.zones));
    }
 }
 
@@ -189,7 +181,7 @@ double calculatePositionGroesse(double stopLossUnits, double Amount)
 
 
 
-void calcPosATR(double ATR,ETPosition &etPos, Position pos)
+void calcPosATR(double ATR,ETPosition &etPos, Position pos, bool singleTarget)
 {
    //Print("ATR :" +ATR);
        etPos.stopLossUnits = ATR*2.0;
@@ -199,30 +191,44 @@ void calcPosATR(double ATR,ETPosition &etPos, Position pos)
       {
         etPos.pos = Buy;
         etPos.stopLoss = (Ask-etPos.stopLossUnits);
-        ArrayResize(etPos.targets, 6,0);
         
-        etPos.targets[0] = (Ask)+(1*ATR)-(Ask-Bid);
-        etPos.targets[1] = (Ask)+(2*ATR)-(Ask-Bid);
-        etPos.targets[2] = (Ask)+(3*ATR)-(Ask-Bid);
-        etPos.targets[3] = (Ask)+(4*ATR)-(Ask-Bid);
-         etPos.targets[4] = (Ask)+(5*ATR)-(Ask-Bid);
-         etPos.targets[5] = (Ask)+(6*ATR)-(Ask-Bid);
-        etPos.targetsHit=0;
-        etPos.takeProfit = (Ask)+(7*ATR)-(Ask-Bid);
+        
+        if(singleTarget)
+         etPos.takeProfit = (Ask)+(1*ATR)-(Ask-Bid);
+        else
+        {
+            ArrayResize(etPos.targets, 6,0); 
+            etPos.targets[0] = (Ask)+(1*ATR)-(Ask-Bid);
+            etPos.targets[1] = (Ask)+(2*ATR)-(Ask-Bid);
+            etPos.targets[2] = (Ask)+(3*ATR)-(Ask-Bid);
+            etPos.targets[3] = (Ask)+(4*ATR)-(Ask-Bid);
+            etPos.targets[4] = (Ask)+(5*ATR)-(Ask-Bid);
+            etPos.targets[5] = (Ask)+(6*ATR)-(Ask-Bid);
+            etPos.targetsHit=0;
+            etPos.takeProfit = (Ask)+(7*ATR)-(Ask-Bid);
+        }
       }
       else
       {
+         
+         
         etPos.pos = Sell;
         etPos.stopLoss = (Bid+etPos.stopLossUnits);
-        ArrayResize(etPos.targets, 6,0);
-        etPos.targetsHit=0;
-        etPos.targets[0] = (Bid)-(1*ATR)+(Ask-Bid);
-        etPos.targets[1] = (Bid)-(2*ATR)+(Ask-Bid);
-        etPos.targets[2] = (Bid)-(3*ATR)+(Ask-Bid);
-        etPos.targets[3] = (Bid)-(4*ATR)+(Ask-Bid);
-        etPos.targets[4] = (Bid)-(5*ATR)+(Ask-Bid);
-        etPos.targets[5] = (Bid)-(6*ATR)+(Ask-Bid);
-        etPos.takeProfit = (Bid)-(7*ATR)+(Ask-Bid);
+        if(singleTarget)
+              etPos.takeProfit = (Bid)-(1*ATR)+(Ask-Bid);
+        else
+        {
+        
+              ArrayResize(etPos.targets, 6,0);
+              etPos.targetsHit=0;
+              etPos.targets[0] = (Bid)-(1*ATR)+(Ask-Bid);
+              etPos.targets[1] = (Bid)-(2*ATR)+(Ask-Bid);
+              etPos.targets[2] = (Bid)-(3*ATR)+(Ask-Bid);
+              etPos.targets[3] = (Bid)-(4*ATR)+(Ask-Bid);
+              etPos.targets[4] = (Bid)-(5*ATR)+(Ask-Bid);
+              etPos.targets[5] = (Bid)-(6*ATR)+(Ask-Bid);
+              etPos.takeProfit = (Bid)-(7*ATR)+(Ask-Bid);
+         }
       }
        
    

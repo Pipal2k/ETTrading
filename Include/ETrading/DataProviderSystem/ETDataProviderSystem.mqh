@@ -33,10 +33,7 @@
 SR_Row sr_rows[];
 int DataProviderOptions;
 
-struct ProvidedData {
-   SR_Zone zones[];
-   
-};
+
 
 void initDataProviderSys(int dpOptions)
 {

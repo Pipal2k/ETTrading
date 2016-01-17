@@ -30,7 +30,7 @@ ProvidedData provData;
 CompiledActionPattern compActionPatterns[];
 
 
-void initETSignalSystem( ActionPattern &input_actionPatterns[], int DataProviderOptions_Flags, int SignalSystemOptions_Flags) export
+void initETSignalSystem( ActionPattern &input_actionPatterns[],  int DataProviderOptions_Flags, int SignalSystemOptions_Flags) export
 {  
    SignalSystemOptions = SignalSystemOptions_Flags;
    initDataProviderSys(DataProviderOptions_Flags);
@@ -49,6 +49,7 @@ void initETSignalSystem( ActionPattern &input_actionPatterns[], int DataProvider
    //actionPatterns = *input_actionPatterns; 
    
 }
+
 
 
 
@@ -107,13 +108,17 @@ void getMatchingActionPatterns(ActionPattern &matchingPatterns[],bool onTime)
    ArrayFree(matchingPatterns);
    for(int i = 0; i < ArraySize(compActionPatterns); i++)
    {
-        patternMatch(compActionPatterns[i],CurrentSignals,onTime);
-     
-       if(ArraySize(compActionPatterns[i].actionPattern.matchingTimes) > 0)
+       if(compActionPatterns[i].actionPattern.status == Enabled)
        {
-         
-         ArrayResize(matchingPatterns,ArraySize(matchingPatterns)+1,0);
-         copyActionPattern(matchingPatterns[ArraySize(matchingPatterns)-1],compActionPatterns[i].actionPattern);
+              patternMatch(compActionPatterns[i],CurrentSignals,onTime);
+           
+             if(ArraySize(compActionPatterns[i].actionPattern.matchingTimes) > 0)
+             {
+               ArrayResize(matchingPatterns,ArraySize(matchingPatterns)+1,0);
+               copyActionPattern(matchingPatterns[ArraySize(matchingPatterns)-1],compActionPatterns[i].actionPattern);
+               copyProvidedData(matchingPatterns[ArraySize(matchingPatterns)-1].prepData,provData);
+               
+             }
        }  
      
    }

@@ -35,16 +35,24 @@ int OnInit()
   int ETSSoption = ( DRAW_SR_ROWS  | DRAW_SR_MID_PIVOTS ) ;
  
   //Define ActionPattern
-  ActionPattern actionPatterns[1];
+  ActionPattern actionPatterns[3];
   actionPatterns[0].pos= Sell;
   actionPatterns[0].name="TEST PATTERN";
   actionPatterns[0].posMethod=ATR;
-  actionPatterns[0].posOptions = SingleTarget;
+  actionPatterns[0].status=Disabled;
+  //actionPatterns[0].posOptions = SingleTarget;
   
-  /*actionPatterns[1].pos= Buy;
+  actionPatterns[1].pos= Buy;
   actionPatterns[1].name="TEST PATTERN";
   actionPatterns[1].posMethod=ATR;
-  actionPatterns[1].posOptions = SingleTarget;*/
+  actionPatterns[1].status=Disabled;
+  //actionPatterns[1].posOptions = SingleTarget;
+  
+  actionPatterns[2].pos= Sell;
+  actionPatterns[2].name="TEST PATTERN";
+  actionPatterns[2].posMethod=SRZONES;
+  actionPatterns[2].posOptions = MultiTargets;
+   actionPatterns[2].status=Enabled;
   
  // ArrayResize(actionPatterns[0].signals,1,0);
  // actionPatterns[0].signals[0] = SIG_SR_BREAKTHROUGHBEARISH;
@@ -61,14 +69,14 @@ int OnInit()
    // actionPatterns[0].Expression = "[(^)SIG_ANY][(1-5)SIG_SR_BREAKTHROUGHBULLISH & SIG_ANY]";
    
    //SIG_SR_TOUCHLOWERBOUNDERY
-   /*actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BEARISHCANDLESTICK] "
+   actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH] [(^)SIG_ANY] [SIG_SR_TOUCHLOWERBOUNDERY] [SIG_BEARISHCANDLESTICK] "
                                  +"WHERE [3].SIG_SR_TOUCHLOWERBOUNDERY.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER && RSI > 60";
                                  
    actionPatterns[1].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_TOUCHHIGHERBOUNDERY] [SIG_BULLISHCANDLESTICK] "
                                  +"WHERE [3].SIG_SR_TOUCHHIGHERBOUNDERY.HIGHBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.HIGHBORDER && RSI < 40";   
-    */
-     actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBEARISH] "
-                                 +"WHERE [1].LOWBORDER > [3].LOWBORDER && [5].LOWBORDER < [3].LOWBORDER";                                                           
+    
+    actionPatterns[2].Expression = "[SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBEARISH] "
+                                 +"WHERE [1].LOWBORDER > [3].LOWBORDER && [5].LOWBORDER < [3].LOWBORDER ";                                                           
    
     //actionPatterns[0].Expression = "[SIG_SR_BREAKTHROUGHBULLISH] [(^)SIG_ANY] [SIG_SR_BREAKTHROUGHBEARISH][(^)SIG_ANY][SIG_SR_BREAKTHROUGHBULLISH]"
      //                             +"WHERE [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [1].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER && [3].SIG_SR_BREAKTHROUGHBEARISH.LOWBORDER = [5].SIG_SR_BREAKTHROUGHBULLISH.LOWBORDER";                                  
@@ -158,8 +166,6 @@ void OnTick()
   
     if(DoSignalProcessing(15))
     {
-      
-     
       getMatchingActionPatterns(matchingPattern,true);
       processPositioning(matchingPattern);
       

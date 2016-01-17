@@ -110,8 +110,10 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
          //Print(buffer.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[0]);
          //Print(tmpBufferThree.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[2]);
          CopyBuffer(mInfo.buffer,i,1,tmpBufferThree,false);
+         //copyProvidedData(mInfo.prepData,provData);
         
          copyMetaInfo(mInfo,  currentSIgnals[ArraySize(currentSIgnals)-1].metaInfo);
+         
          
          
          //currentSIgnals[ArraySize(currentSIgnals)-1].metaInfo=mIn;

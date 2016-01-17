@@ -176,6 +176,11 @@ struct SR_Zone
  int SRType;
 };
 
+struct ProvidedData {
+   SR_Zone zones[];
+   
+};
+
 struct MetaInfo
 {
   //SR_Zone SR_BREAKS[];
@@ -212,7 +217,8 @@ struct CompiledTerm
 
 enum PositionOption
 {
-   SingleTarget = 0x01
+   SingleTarget = 0x01,
+   MultiTargets = 0x02
 };
 
 enum PositionMethod
@@ -220,6 +226,14 @@ enum PositionMethod
   ATR,
   SRZONES
 };
+
+enum PatternStatus
+{
+  Enabled,
+  Disabled
+};
+
+
 
 struct ActionPattern
 {
@@ -230,8 +244,10 @@ struct ActionPattern
   datetime matchingTimes[];
   PositionMethod posMethod;
   int posOptions;
+  PatternStatus status;
   
   ETSignal matchingSignal[];
+  ProvidedData prepData;
   //int signals[]; //Flags 
   
 };
@@ -328,6 +344,7 @@ void copyMetaInfo(MetaInfo &src, MetaInfo &dst)
     //dst.open = src.open;
     
     CopyBuffer(dst.buffer,0,ArraySize(src.buffer.OpenBuffer),src.buffer,false);
+    //copyProvidedData(dst.prepData,src.prepData);
 }
 
 void copySRZones(SR_Zone &src, SR_Zone &dst)
@@ -385,8 +402,16 @@ void copyActionPattern(ActionPattern &dest, ActionPattern &source)
     
      dest.posMethod= source.posMethod;
      dest.posOptions=source.posOptions;
+     dest.status = source.status;
      
      copyETSignal(source.matchingSignal,dest.matchingSignal);
+     //copyProvidedData(dest.prepData,source.prepData);
+     
+}
+
+void copyProvidedData(ProvidedData &destData, ProvidedData &srcData)
+{
+   ArrayCopy(destData.zones,srcData.zones,0,0,WHOLE_ARRAY);
 }
 
 struct ETPosition
