@@ -13,7 +13,7 @@ Adding a new Signal:
 
 	.) implement Processing for the new Signal (dont forget to fill metainfo)
 
-- ETActionPattern.mqh
+- ETActionPatternParser.mqh
 
 	.) implement in StringToBitFlag()
 	.) implement in mapOperantFunc()
@@ -21,3 +21,14 @@ Adding a new Signal:
 
 - ETActionPatternMatch.mqh
         .) implement in getFuncValue()
+        
+ ------------------------------------------------------------
+ 
+ Adding new Where Function
+ 
+ - ETDataTypes.mqh 
+ .) define new iFunc in WhereOperantFunc
+ 
+ - ETActionPatternParser.mqh
+  .) add mapping to mapOperantFunc   
+  .) add attribute to mapOperantFuncAttribute (Optional) 

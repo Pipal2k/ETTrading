@@ -12,7 +12,7 @@
 #include <ETrading/DataProviderSystem/ETDataProviderSystem.mqh>
 #include <ETrading/ETBarBuffer.mqh>
 #include <ETrading/SignalSystem/ETSignalProcessing.mqh>
-#include <ETrading/SignalSystem/ETActionPattern.mqh>
+#include <ETrading/SignalSystem/ETActionPatternParser.mqh>
 #include <ETrading/SignalSystem/ETActionPatternMatch.mqh>
 
 //#define PIVOT 

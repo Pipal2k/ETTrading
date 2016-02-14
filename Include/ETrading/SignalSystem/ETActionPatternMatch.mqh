@@ -306,14 +306,20 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
    
    for(int x=0; x < ArraySize(cAPattern.whereCondition); x++)
    {
-       //double results[];
+       /*
        double op1[];
+       int op1Int[];
        double op2[];
+       int op2Int[];*/
+       
+       Operant op1[];
+       Operant op2[];
        
        if(cAPattern.whereCondition[x].Operant1Typ == BAROPERANT )
        {
             for(int i =0; i < ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals);i++)
             {
+                  //getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals[i].metaInfo,op1,op1Int); 
                   getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals[i].metaInfo,op1); 
             }      
        } 
@@ -322,15 +328,26 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
        {
             for(int i =0; i < ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals);i++)
             {
+                  //getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals[0].metaInfo,op1,op1Int); 
                   getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals[0].metaInfo,op1); 
             }      
        } 
 
-       if(cAPattern.whereCondition[x].Operant2Typ == BAROPERANT || cAPattern.whereCondition[x].Operant2Typ == FUNKTIONOPERANT)
+       if(cAPattern.whereCondition[x].Operant2Typ == BAROPERANT)
        {
             for(int i =0; i < ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex2].matchingSignals);i++)
             {
+                  //getFuncValue(cAPattern.whereCondition[x].Operant2Func,cAPattern.whereCondition[x].Operant2FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex2].matchingSignals[i].metaInfo,op2,op2Int); 
                   getFuncValue(cAPattern.whereCondition[x].Operant2Func,cAPattern.whereCondition[x].Operant2FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex2].matchingSignals[i].metaInfo,op2); 
+            }      
+       }
+       
+       if(cAPattern.whereCondition[x].Operant2Typ == FUNKTIONOPERANT)
+       {
+            for(int i =0; i < ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex2].matchingSignals);i++)
+            {
+                  //getFuncValue(cAPattern.whereCondition[x].Operant2Func,cAPattern.whereCondition[x].Operant2FuncAttr,cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals[i].metaInfo,op2,op2Int); 
+                  getFuncValue(cAPattern.whereCondition[x].Operant2Func,cAPattern.whereCondition[x].Operant2FuncAttr,cAPattern.compiledBarPatterns[ArraySize(cAPattern.compiledBarPatterns)-1].matchingSignals[i].metaInfo,op2); 
             }      
        }
        
@@ -338,13 +355,13 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
        if(cAPattern.whereCondition[x].Operant1Typ == VALUEOPERANT)
        {
              ArrayResize(op1,1,0);
-             op1[0] = cAPattern.whereCondition[x].Operant1Value;
+             op1[0].opDouble = cAPattern.whereCondition[x].Operant1Value;
        }
        
       if(cAPattern.whereCondition[x].Operant2Typ == VALUEOPERANT)
       {
            ArrayResize(op2,1,0);
-           op2[0] = cAPattern.whereCondition[x].Operant2Value;
+           op2[0].opDouble = cAPattern.whereCondition[x].Operant2Value;
       }
        
        
@@ -369,7 +386,7 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
    return evaluateOperators(conditions,cAPattern.whereCondOperator);
 }
 
-bool isWhereCondTrue(double &op1[], double &op2[], string Operator)
+/*bool isWhereCondTrue(double &op1[], double &op2[], string Operator)
 {
     bool condition = false;
     
@@ -413,28 +430,310 @@ bool isWhereCondTrue(double &op1[], double &op2[], string Operator)
       
       
       return condition;
+}*/
+
+bool isWhereCondTrue(Operant &op1[], Operant &op2[], string Operator)
+{
+    bool condition = false;
+    
+      
+          for(int i = 0; i < ArraySize(op1); i++)
+          {
+              for(int x = 0; x < ArraySize(op2); x++)
+              {
+                
+                 if( (Operator == "=" || Operator == "==") && (op1[i].isIntFlag == false && op2[x].isIntFlag == false) )
+                 {
+                     //Print("OP1: "+op1[i].isIntFlag+ "OP2: "+op2[x].isIntFlag);
+                     if(op1[i].opDouble == op2[x].opDouble)
+                     {
+                        
+                        condition = true;
+                        break;
+                     }
+                 }
+                 if((Operator == "=" || Operator == "==") && (op1[i].isIntFlag == true && op2[x].isIntFlag == true) )
+                 {
+                     
+                     Print("OP1: "+op1[i].opInt+ "OP2: "+op2[x].opInt);
+                     if(op1[i].opInt & op2[x].opInt)
+                     {
+                        condition = true;
+                        break;
+                     }
+                 }
+                 if( Operator == "<")
+                 {
+                     if(op1[i].opDouble< op2[x].opDouble)
+                     {
+                        condition = true;
+                        break;
+                     }
+                 }
+                 if( Operator == "<=" || Operator == "=<")
+                 {
+                     if(op1[i].opDouble <= op2[x].opDouble)
+                     {
+                        condition = true;
+                        break;
+                     }
+                 }
+               
+                 if( Operator == ">")
+                 {
+                     if(op1[i].opDouble > op2[x].opDouble)
+                     {
+                        condition = true;
+                        break;
+                     }
+                 }
+                   if( Operator == ">=" || Operator == "=>")
+                 {
+                     if(op1[i].opDouble >= op2[x].opDouble)
+                     {
+                        condition = true;
+                        break;
+                     }
+                 }
+                 
+                
+          
+              }
+              
+              if(condition)
+              break;
+          }
+      
+      
+      return condition;
+}
+
+int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,MetaInfo &metaInfo,Operant &results[])
+{
+    
+    ArrayFree(results);
+    
+   
+    if(func == iRSI)
+    {
+       ArrayResize(results,1,0);
+       results[0].opDouble = metaInfo.RSI;
+       return 1;
+    }
+    else if(func == iCCI)
+    {
+       ArrayResize(results,1,0);
+       results[0].opDouble = metaInfo.CCI;
+       return 1;
+    }
+    else if(func == iSTOCH)
+    {
+       ArrayResize(results,1,0);
+       results[0].opDouble = metaInfo.STOCH;
+       return 1;
+    }
+    else if(func == iR1)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= R1;
+       return 1;
+    }
+    else if(func == iR2)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= R2;
+       return 1;
+    }
+    else if(func == iR3)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= R3;
+       return 1;
+    }
+    else if(func == iRESISTANCE)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= RESISTANCE;
+       return 1;
+    }
+    else if(func == iS1)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= S1;
+       return 1;
+    }
+    else if(func == iS2)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= S2;
+       return 1;
+    }
+    else if(func == iS3)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= S3;
+       return 1;
+    }
+    else if(func == iSUPPORT)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= SUPPORT;
+       return 1;
+    }                    
+    else if(func == iSIG_SR_BREAKTHROUGHBEARISH)
+    {
+      
+         for(int x=0; x < ArraySize(metaInfo.iSIG_SR_BREAKTHROUGHBEARISH); x++)
+         {
+              if(funcAtrr == LOWBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].LowBorder;
+              }
+              else if(funcAtrr == HIGHBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].HighBorder;
+              }
+               else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].isIntFlag=true;
+                 results[ArraySize(results)-1].opInt = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].SRType;
+              }
+              else if(funcAtrr == NONE)
+              {
+                 ArrayResize(results,ArraySize(results)+2,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].HighBorder;
+                 results[ArraySize(results)-2].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].LowBorder;
+              }
+         }
+       
+      
+       return 1;
+    }  
+    else if(func == iSIG_SR_BREAKTHROUGHBULLISH)
+    {
+      
+         for(int x=0; x < ArraySize(metaInfo.iSIG_SR_BREAKTHROUGHBULLISH); x++)
+         {
+              if(funcAtrr == LOWBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].LowBorder;
+              }
+              else if(funcAtrr == HIGHBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].HighBorder;
+              }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].isIntFlag=true;
+                 results[ArraySize(results)-1].opInt = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].SRType;
+              }
+              else if(funcAtrr == NONE)
+              {
+                 ArrayResize(results,ArraySize(results)+2,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].HighBorder;
+                 results[ArraySize(results)-2].opDouble = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].LowBorder;
+              }
+         }
+            
+       return 1;
+    }    
+    else if(func == iSIG_SR_TOUCHLOWERBOUNDERY)
+    {
+         for(int x=0; x < ArraySize(metaInfo. iSIG_SR_TOUCHLOWERBOUNDERY); x++)
+         {
+              if(funcAtrr == LOWBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo. iSIG_SR_TOUCHLOWERBOUNDERY[x].LowBorder;
+              }
+              else if(funcAtrr == HIGHBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo. iSIG_SR_TOUCHLOWERBOUNDERY[x].HighBorder;
+              }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].isIntFlag=true;
+                 results[ArraySize(results)-1].opInt = metaInfo.iSIG_SR_TOUCHLOWERBOUNDERY[x].SRType;
+              }
+              else if(funcAtrr == NONE)
+              {
+                 ArrayResize(results,ArraySize(results)+2,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_TOUCHLOWERBOUNDERY[x].HighBorder;
+                 results[ArraySize(results)-2].opDouble = metaInfo.iSIG_SR_TOUCHLOWERBOUNDERY[x].LowBorder;
+              }
+         }
+       return 1;
+    }
+    else if(func == iSIG_SR_TOUCHHIGHERBOUNDERY)
+    {
+         for(int x=0; x < ArraySize(metaInfo. iSIG_SR_TOUCHHIGHERBOUNDERY); x++)
+         {
+              if(funcAtrr == LOWBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo. iSIG_SR_TOUCHHIGHERBOUNDERY[x].LowBorder;
+              }
+              else if(funcAtrr == HIGHBORDER)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo. iSIG_SR_TOUCHHIGHERBOUNDERY[x].HighBorder;
+              }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(results,ArraySize(results)+1,0);
+                 results[ArraySize(results)-1].isIntFlag=true;
+                 results[ArraySize(results)-1].opInt = metaInfo.iSIG_SR_TOUCHHIGHERBOUNDERY[x].SRType;
+              }
+              else if(funcAtrr == NONE)
+              {
+                 ArrayResize(results,ArraySize(results)+2,0);
+                 results[ArraySize(results)-1].opDouble = metaInfo.iSIG_SR_TOUCHHIGHERBOUNDERY[x].HighBorder;
+                 results[ArraySize(results)-2].opDouble = metaInfo.iSIG_SR_TOUCHHIGHERBOUNDERY[x].LowBorder;
+              }
+         }
+       return 1;
+    }
+  
+    
+    
+    return -1;       
 }
 
 
-
-int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,MetaInfo &metaInfo,double &results[])
+/*int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,MetaInfo &metaInfo,double &results[], int &resultsInt[])
 {
     
     ArrayFree(results);
 
-    if(func == RSI)
+    if(func == iRSI)
     {
        ArrayResize(results,1,0);
        results[0] = metaInfo.RSI;
        return 1;
     }
-    else if(func == CCI)
+    else if(func == iCCI)
     {
        ArrayResize(results,1,0);
        results[0] = metaInfo.CCI;
        return 1;
     }
-    else if(func == STOCH)
+    else if(func == iSTOCH)
     {
        ArrayResize(results,1,0);
        results[0] = metaInfo.STOCH;
@@ -457,8 +756,8 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
               }
                else if(funcAtrr == TYPE)
               {
-                 ArrayResize(results,ArraySize(results)+1,0);
-                 results[ArraySize(results)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].HighBorder;
+                 ArrayResize(resultsInt,ArraySize(resultsInt)+1,0);
+                 resultsInt[ArraySize(resultsInt)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].SRType;
               }
               else if(funcAtrr == NONE)
               {
@@ -486,6 +785,11 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
                  ArrayResize(results,ArraySize(results)+1,0);
                  results[ArraySize(results)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].HighBorder;
               }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(resultsInt,ArraySize(resultsInt)+1,0);
+                 resultsInt[ArraySize(resultsInt)-1] = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].SRType;
+              }
               else if(funcAtrr == NONE)
               {
                  ArrayResize(results,ArraySize(results)+2,0);
@@ -493,8 +797,7 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
                  results[ArraySize(results)-2] = metaInfo.iSIG_SR_BREAKTHROUGHBULLISH[x].LowBorder;
               }
          }
-       
-      
+            
        return 1;
     }    
     else if(func == iSIG_SR_TOUCHLOWERBOUNDERY)
@@ -510,6 +813,11 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
               {
                  ArrayResize(results,ArraySize(results)+1,0);
                  results[ArraySize(results)-1] = metaInfo. iSIG_SR_TOUCHLOWERBOUNDERY[x].HighBorder;
+              }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(resultsInt,ArraySize(resultsInt)+1,0);
+                 resultsInt[ArraySize(resultsInt)-1] = metaInfo.iSIG_SR_TOUCHLOWERBOUNDERY[x].SRType;
               }
               else if(funcAtrr == NONE)
               {
@@ -534,6 +842,11 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
                  ArrayResize(results,ArraySize(results)+1,0);
                  results[ArraySize(results)-1] = metaInfo. iSIG_SR_TOUCHHIGHERBOUNDERY[x].HighBorder;
               }
+              else if(funcAtrr == TYPE)
+              {
+                 ArrayResize(resultsInt,ArraySize(resultsInt)+1,0);
+                 resultsInt[ArraySize(resultsInt)-1] = metaInfo.iSIG_SR_TOUCHHIGHERBOUNDERY[x].SRType;
+              }
               else if(funcAtrr == NONE)
               {
                  ArrayResize(results,ArraySize(results)+2,0);
@@ -550,7 +863,7 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
     
     
     return -1;       
-}
+}*/
 
 
 

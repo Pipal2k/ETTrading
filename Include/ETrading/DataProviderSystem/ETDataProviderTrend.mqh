@@ -1,5 +1,5 @@
 //+------------------------------------------------------------------+
-//|                                         ETDataProviderSystem.mqh |
+//|                                          ETDataProviderTrend.mqh |
 //|                        Copyright 2015, MetaQuotes Software Corp. |
 //|                                             https://www.mql5.com |
 //+------------------------------------------------------------------+
@@ -8,8 +8,6 @@
 #property strict
 
 #include <ETrading/ETdataTypes.mqh>
-#include <ETrading/DataProviderSystem/ETPivot.mqh>
-#include <ETrading/DataProviderSystem/ETDataProviderTrend.mqh>
 //+------------------------------------------------------------------+
 //| defines                                                          |
 //+------------------------------------------------------------------+
@@ -31,51 +29,19 @@
 // #import
 //+------------------------------------------------------------------+
 
-SR_Row sr_rows[];
-int DataProviderOptions;
-
-
-
-void initDataProviderSys(int dpOptions)
+void findTrend(int dpOptions,ProvidedData &data)
 {
-   DataProviderOptions = dpOptions;
-}
-
-void provideData(ProvidedData &data)
-{
-   findSRZones(data.zones);
-   findTrend(DataProviderOptions,data);
-}
-
-void findSRZones(SR_Zone &zones[])
-{
+  /*Position ADXI_CURRENT = None;
+  Position ADXI_M1 = None;
+  Position ADXI_M5 = None;
+  Position ADXI_M15 = None;
+  Position ADXI_M30 = None;
+  Position ADXI_H1 = None;  
+  Position ADXI_H4 = None;
+  Position ADXI_D1 = None;
+  Position ADXI_W1 = None;
+  Position ADXI_MN1 = None;*/
   
-  ArrayFree(sr_rows);
-  ArrayFree(zones);
+ 
   
-  if(DataProviderOptions & PIVOT)
-   calculatePivot(sr_rows,PERIOD_D1,Standard);
-  
-  if(DataProviderOptions & FPIVOT)
-   calculatePivot(sr_rows,PERIOD_D1,Fibo);
-   
-  //if(DataProviderOptions & KeyLevels)
-  // calculateKeyLevels(
-   
-   RowsToZones(zones,sr_rows);
-}
-
-void RowsToZones(SR_Zone &destZones[], SR_Row &rows[])
-{
-   ArrayFree(destZones);
-   
-   for(int i; i < ArraySize(rows); i++)
-   {
-     ArrayResize(destZones, ArraySize(destZones)+1,0);
-     destZones[ArraySize(destZones)-1].HighBorder= rows[i].Prize;
-     destZones[ArraySize(destZones)-1].LowBorder= rows[i].Prize;
-     
-     destZones[ArraySize(destZones)-1].SRType =rows[i].type;
-   }
-
 }

@@ -39,6 +39,8 @@
 #define SIG_CS_THREEDARKCLOUD 0x4000
 #define SIG_CS_HAMMER 0x8000
 #define SIG_CS_INVERTEDHAMMER 0x10000
+#define SIG_SHORTTREND 0x20000
+#define SIG_LONGTREND 0x40000
 
 enum Position
 {
@@ -52,6 +54,17 @@ enum DataProviderSys_Options
    PIVOT = 0x01,
    FPIVOT = 0x02,
    KEYLEVELS =0x04,
+   /*TREND_ADXI = 0x08,
+   TREND_ADXI_M1 = 0x10,
+   TREND_ADXI_M5 = 0x20,
+   TREND_ADXI_M15 = 0x40,
+   TREND_ADXI_M30 = 0x80,
+   TREND_ADXI_H1 = 0x100,
+   TREND_ADXI_H4 = 0x200,
+   TREND_ADXI_D1 = 0x400,
+   TREND_ADXI_W1 = 0x800,
+   TREND_ADXI_MN = 0x1000,
+   TREND_ADXI_CONFIRMED = 0x2000*/
 };
 
 enum SignalSys_Options
@@ -59,10 +72,11 @@ enum SignalSys_Options
    //PIVOT = 0x01,
    //FPIVOT = 0x02,
    //KEYLEVELS =0x04,
-   DRAW_SR_ROWS= 0x08,
-   DRAW_SR_MID_PIVOTS = 0x10,
-   DEBUG_SIGNALS = 0x20,
-   USE_MIDPIVOTS =0x40
+   DRAW_SR_ROWS= 0x01,
+   DRAW_SR_MID_PIVOTS = 0x02,
+   DEBUG_SIGNALS = 0x04,
+   USE_MIDPIVOTS =0x08,
+   TREND_ADXI = 0x10
 };
 
 enum FlagOperator
@@ -178,6 +192,7 @@ struct SR_Zone
 
 struct ProvidedData {
    SR_Zone zones[];
+   int TrendFlags;
    
 };
 
@@ -218,7 +233,8 @@ struct CompiledTerm
 enum PositionOption
 {
    SingleTarget = 0x01,
-   MultiTargets = 0x02
+   MultiTargets = 0x02,
+   IncludeMidpivots = 0x04
 };
 
 enum PositionMethod
@@ -267,6 +283,13 @@ struct CompiledBarActionPattern
    
 };
 
+struct Operant
+{
+  double opDouble;
+  int opInt;
+  bool isIntFlag;
+};
+
 enum WhereOperantTyp
 {
    BAROPERANT,
@@ -285,9 +308,17 @@ enum WhereOperantFuncAttribute
 
 enum WhereOperantFunc
 {
-   RSI,
-   STOCH,
-   CCI,
+   iRSI,
+   iSTOCH,
+   iCCI,
+   iR1,
+   iR2,
+   iR3,
+   iRESISTANCE,
+   iS1,
+   iS2,
+   iS3,
+   iSUPPORT,
    iSIG_SR_BREAKTHROUGHBEARISH,
    iSIG_SR_BREAKTHROUGHBULLISH,
    iSIG_SR_TOUCHHIGHERBOUNDERY,

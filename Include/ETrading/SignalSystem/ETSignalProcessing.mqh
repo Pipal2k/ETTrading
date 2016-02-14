@@ -91,6 +91,9 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
         CandleStickPattern cPatterns[]; 
         findCandleStickPattern(tmpBufferThree,cPatterns);
         setCandleStickSignal(cPatterns,sig);
+        
+        checkSIG_TREND(SignalSystemOptions,sig);
+        
            
          
            
@@ -120,6 +123,11 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
       }
    }
    
+}
+
+void checkSIG_TREND(int sysSignalOption, int signal)
+{
+  
 }
 
 

@@ -76,7 +76,7 @@ void calculatePivot(SR_Row &rows[], int timeframe, PivotKind kind) export
      calculateFibonacciPivot(pivot,timeframe);
   
   
-  tmpRows[0].type=(DPivot | RESISTANCE | SUPPORT);
+  tmpRows[0].type=(DPivot);
   tmpRows[0].Prize=pivot.DPivot;
   tmpRows[1].type=(R1 | RESISTANCE);
   tmpRows[1].Prize=pivot.R1;
@@ -102,7 +102,7 @@ void calculatePivot(SR_Row &rows[], int timeframe, PivotKind kind) export
   tmpRows[11].Prize=pivot.MS2;
   tmpRows[12].type=(MS3 | SUPPORT | MIDPIVOT);
   tmpRows[12].Prize=pivot.MS3; 
-  tmpRows[13].type=(WPivot | SUPPORT | RESISTANCE);
+  tmpRows[13].type=(WPivot);
   tmpRows[13].Prize=pivot.WPivot; 
   
   //ArrayResize(rows,ArraySize(rows)+14,0);

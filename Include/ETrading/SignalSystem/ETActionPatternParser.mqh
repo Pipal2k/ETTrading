@@ -228,18 +228,18 @@ void parseFuncWhereOperant(uchar &exp_chars[], int index,WhereCondition &wCond,i
    uchar charBuffer[];
    int OperantIndex;
    
-   while(exp_chars[index] != ' ' && exp_chars[index] != '<' && exp_chars[index]!='=' && exp_chars[index]!='>' && exp_chars[index]!='!' )
+   while( index < ArraySize(exp_chars) && exp_chars[index] != ' ' && exp_chars[index] != '<' && exp_chars[index]!='=' && exp_chars[index]!='>' && exp_chars[index]!='!' )
    {
       ArrayResize(charBuffer,ArraySize(charBuffer)+1,0);
       charBuffer[ArraySize(charBuffer)-1]=exp_chars[index];
       index++;
    }
    
-   if(exp_chars[index] == 0)
+   /*if(exp_chars[index] == 0)
    {
       SetUserError(1);
          return;
-   }
+   }*/
    
    string tmpFunc =  StringTrimRight(StringTrimLeft(CharArrayToString(charBuffer,0,WHOLE_ARRAY,CP_ACP)));
     StringToUpper(tmpFunc);
@@ -335,11 +335,27 @@ bool mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
    
    funcStr = splitted[0];
    if(funcStr == "RSI")
-     func = RSI;
+     func = iRSI;
    else if(funcStr == "CCI")
-     func = RSI;
+     func = iCCI;
    else if(funcStr == "STOCH")
-     func = STOCH;  
+     func = iSTOCH;
+   else if(funcStr == "R1")
+     func = iR1;
+   else if (funcStr == "R2")
+     func = iR2;
+   else if (funcStr == "R3")
+     func = iR3;
+   else if (funcStr == "RESISTANCE")
+     func = iRESISTANCE;
+   else if(funcStr == "S1")
+     func = iS1;
+   else if (funcStr == "S2")
+     func = iS2;
+   else if (funcStr == "S3")
+     func = iS3;
+   else if (funcStr == "SUPPORT")
+     func = iSUPPORT;  
    else if(funcStr == "SIG_SR_BREAKTHROUGHBULLISH")
      func = iSIG_SR_BREAKTHROUGHBULLISH;  
    else if(funcStr == "SIG_SR_BREAKTHROUGHBEARISH")
@@ -354,7 +370,6 @@ bool mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
      func = iSIG_BULLISHCADLESTICK;
    else if(funcStr == "SIG_CS_BEARISHENGULFING")
      func = iSIG_CS_BEARSIHENGULFING;         
-    
           
     if(k==2)
         mapOperantFuncAttribute(splitted[1],funcAttr);
@@ -375,7 +390,7 @@ void mapOperantFuncAttribute(string funcAttrStr, WhereOperantFuncAttribute &func
      funcAttr = HIGHBORDER;
    else if(funcAttrStr == "LOWBORDER" || funcAttrStr == "LOW")
      funcAttr = LOWBORDER;  
-    if(funcAttrStr == "TYPE")
+    else if(funcAttrStr == "TYPE")
      funcAttr = TYPE;  
    else 
      funcAttr =NONE;
