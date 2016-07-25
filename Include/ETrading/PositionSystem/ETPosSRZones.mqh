@@ -30,9 +30,9 @@
 //+------------------------------------------------------------------+
 
 
-void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosition &posit,bool useMidPivots)
+bool calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosition &posit,bool useMidPivots,bool singleTarget)
 { 
-  Print("ATR:"+ATR);
+  //Print("ATR:"+ATR);
   ArrayFree(posit.targets);
    SR_Zone foundZones[];
    if(posit.pos == Sell)
@@ -44,6 +44,29 @@ void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosit
        startFindingSRZones(currentPrize,zones,foundZones,Buy,useMidPivots);
    }
    
+    //Check if nextzone is far away
+   if(posit.pos == Sell)
+   {
+      //Print("CurrentPrize: "+ currentPrize+ " next: "+ foundZones[0].HighBorder+" mathAbs: "+ MathAbs(currentPrize-foundZones[0].HighBorder) + " Spread: "+2*(Ask-Bid));
+         if( ArraySize(foundZones) > 0 && MathAbs(currentPrize-foundZones[0].HighBorder) < 2*(Ask-Bid))
+         {
+            //Print("return false");
+            return false;
+         }
+    }
+    
+     //Check if nextzone is far away
+    if(posit.pos == Buy)
+   {
+      //Print("CurrentPrize: "+ currentPrize+ " next: "+ foundZones[0].HighBorder+" mathAbs: "+ MathAbs(currentPrize-foundZones[0].HighBorder) + " Spread: "+2*(Ask-Bid));
+         if(ArraySize(foundZones)>0 && MathAbs(currentPrize-foundZones[0].LowBorder) < 2*(Ask-Bid))
+         {
+            //Print("return false");
+            return false;
+         }
+    }     
+         
+   
    double tmpTarget;
    for(int i = 0; i< ArraySize(foundZones)-1; i++)
    {
@@ -51,6 +74,9 @@ void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosit
       
       if(posit.pos == Sell)
       {
+          
+         
+            
          if(MathAbs(currentPrize-foundZones[i].HighBorder) < ATR)
            tmpTarget = currentPrize-(ATR+(20*Point));
          else
@@ -59,6 +85,7 @@ void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosit
       }
       else if(posit.pos == Buy)
       {
+         
          if(MathAbs(currentPrize-foundZones[i].LowBorder) < ATR)
            tmpTarget = currentPrize + (ATR-(20*Point));
          else
@@ -69,12 +96,19 @@ void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosit
       posit.targets[ArraySize(posit.targets)-1]=tmpTarget;
    }
    
-   if(ArraySize(foundZones) > 0)
+   if(ArraySize(foundZones) > 0 && !singleTarget)
    {
-      if(posit.pos == Sell)
-         posit.takeProfit = foundZones[ArraySize(foundZones)-1].HighBorder + (20*Point);
+       if(posit.pos == Sell)
+          posit.takeProfit = foundZones[ArraySize(foundZones)-1].HighBorder + (20*Point);
       else
          posit.takeProfit = foundZones[ArraySize(foundZones)-1].LowBorder - (20*Point);
+   }
+   else if(ArraySize(foundZones) > 0 && singleTarget)
+   {
+      if(posit.pos == Sell)
+          posit.takeProfit = foundZones[0].HighBorder + (20*Point);
+      else
+         posit.takeProfit = foundZones[0].LowBorder - (20*Point);  
    }
    else
    {
@@ -84,7 +118,7 @@ void calcSRZonesTargets(double currentPrize,double ATR,SR_Zone &zones[], ETPosit
          posit.takeProfit = 1.5*ATR - (20*Point);
    }
            
-      
+   return true;   
 }
 
 void calcSRZonesStopLoss(double currentPrize,double ATR,SR_Zone &zones[], ETPosition &posit,bool useMidPivots)
@@ -106,13 +140,13 @@ void calcSRZonesStopLoss(double currentPrize,double ATR,SR_Zone &zones[], ETPosi
    
    if(ArraySize(foundZones) > 0)
    {
-      Print("StopLoss: "+foundZones[0].LowBorder);  
+      //Print("StopLoss: "+foundZones[0].LowBorder);  
       int i =0;
       while(i < ArraySize(foundZones) && MathAbs(currentPrize-foundZones[i].LowBorder) < 2*ATR  )
       {
            i++; 
       }
-      Print("i: "+i);  
+      //Print("i: "+i);  
       
           
       if(posit.pos == Sell && i < ArraySize(foundZones))

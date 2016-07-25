@@ -43,9 +43,9 @@ void processPositioning(ActionPattern &matchingPattern[])
         {
            if(!checkParadoxumPatterns(matchingPattern))
            {
-               currentPos.pos=matchingPattern[0].pos;
+               currentPos.pos=matchingPattern[0].position.pos;
                calculatePosition(matchingPattern[0],currentPos);
-               OpenPosition(currentPos,matchingPattern[0].pos);
+               OpenPosition(currentPos,matchingPattern[0].position.pos);
                
            }
         }
@@ -89,7 +89,7 @@ void processPositioning(ActionPattern &matchingPattern[])
                     }
               }
           }*/
-        //Position bereits offen eventuell schlieﬂen und next target
+        //Position bereits offen eventuell schlie?en und next target
         if(ArraySize(currentPos.targets) > 0)
         if( (currentPos.pos == Buy && ((Bid >= currentPos.targets[0] && currentPos.targetsHit == 0) ||  (Bid >= currentPos.targets[1] && currentPos.targetsHit == 1))) )
         {
@@ -157,19 +157,20 @@ void processPositioning(ActionPattern &matchingPattern[])
 void calculatePosition(ActionPattern &matchingPattern,ETPosition &etPos)
 {
    
-   if(matchingPattern.posMethod == ATR)
+   if(matchingPattern.position.posMethod == ATR)
    {  
-      calcPosATR(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],etPos,matchingPattern.pos,(matchingPattern.posOptions & SingleTarget));
+      calcPosATR(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],etPos,matchingPattern.position.pos,(matchingPattern.position.posOptions & SingleTarget));
       etPos.size = calculatePositionGroesse(etPos.stopLossUnits,AccountEquity());
       
    }
-   else if(matchingPattern.posMethod == SRZONES)
+   else if(matchingPattern.position.posMethod == SRZONES)
    {
         Print("Prepared Data Zones Count: "+ ArraySize(matchingPattern.prepData.zones));
         
         //calcPosSRZones(matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],etPos,matchingPattern.pos,matchingPattern.prepData,(matchingPattern.posOptions & SingleTarget),(matchingPattern.posOptions & IncludeMidpivots));
-        calcSRZonesTargets(Bid,matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],matchingPattern.prepData.zones,etPos,(matchingPattern.posOptions & IncludeMidpivots));
-        calcSRZonesStopLoss(Bid,matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],matchingPattern.prepData.zones,etPos,(matchingPattern.posOptions & IncludeMidpivots));
+        calcSRZonesTargets(Bid,matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],matchingPattern.prepData.zones,etPos,(matchingPattern.position.posOptions & IncludeMidpivots),SingleTarget);
+                             
+        calcSRZonesStopLoss(Bid,matchingPattern.matchingSignal[0].metaInfo.buffer.ATRBuffer[0],matchingPattern.prepData.zones,etPos,(matchingPattern.position.posOptions & IncludeMidpivots));
         
         etPos.size = calculatePositionGroesse(etPos.stopLossUnits,AccountEquity());
    }
@@ -181,7 +182,7 @@ double calculatePositionGroesse(double stopLossUnits, double Amount)
       double stopLossPipe=stopLossUnits/Point;
       double PV=MarketInfo(Symbol(),MODE_TICKVALUE);
       double positionGr=(Amount *(2.0/100.0))/(stopLossPipe*PV);
-      //Print("Positionsgroeﬂe: ",NormalizeDouble(positionGr,1));
+      //Print("Positionsgroe?e: ",NormalizeDouble(positionGr,1));
       
       if(positionGr < 0.1)
         positionGr = 0.1;
@@ -397,10 +398,10 @@ bool checkParadoxumPatterns(ActionPattern &matchingPattern[])
     
     for(int i = 0; i < ArraySize(matchingPattern);i++)
     {
-        if(matchingPattern[i].pos == Buy)
+        if(matchingPattern[i].position.pos == Buy)
          buy = true;
         
-        if(matchingPattern[i].pos == Sell)
+        if(matchingPattern[i].position.pos == Sell)
         sell = true;   
     }
     
@@ -480,5 +481,3 @@ void OpenPosition(ETPosition &etPos,Position pos)
         }
      
 } 
-
-

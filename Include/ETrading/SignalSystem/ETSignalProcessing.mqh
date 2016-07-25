@@ -32,7 +32,7 @@
 // #import
 //+------------------------------------------------------------------+
 
-void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal, int SignalSystemOptions)
+void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal,int timeFrame,int SignalSystemOptions)
 {
    ArrayFree(currentSIgnals);
    
@@ -50,7 +50,7 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
       Buffers tmpBufferThree;
       CopyBuffer(mInfo.buffer,i,1,buffer,false);
       //CopyBuffer(tmpBufferThree,i,3,buffer,true);
-      initBuffers(tmpBufferThree,buffer.TimeBuffer[i],3,Period(),true);
+      initBuffers(tmpBufferThree,buffer.TimeBuffer[i],3,timeFrame,true);
       
       
       if(ArraySize(currentSIgnals) > 0)
@@ -92,14 +92,12 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
         findCandleStickPattern(tmpBufferThree,cPatterns);
         setCandleStickSignal(cPatterns,sig);
         
-        checkSIG_TREND(SignalSystemOptions,sig);
-        
+        checkADXI(buffer,SignalSystemOptions,sig,mInfo,i);
+        checkSIG_TREND_MA200(buffer,SignalSystemOptions,sig,i);
            
          
            
       sig |= SIG_ANY;
-      
-      
       
       
       if(sig > 0)
@@ -109,6 +107,7 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
          currentSIgnals[ArraySize(currentSIgnals)-1].time=buffer.TimeBuffer[i];
          
          mInfo.RSI=buffer.RSIBuffer[i];
+         mInfo.barIndex = i;
          //mInfo.open=buffer.OpenBuffer[i];
          //Print(buffer.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[0]);
          //Print(tmpBufferThree.TimeBuffer[i] +" "+tmpBufferThree.OpenBuffer[2]);
@@ -125,9 +124,34 @@ void process(Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,
    
 }
 
-void checkSIG_TREND(int sysSignalOption, int signal)
+void checkSIG_TREND_MA200(Buffers &buffer,int sysSignalOption, int &signal,int index)
 {
-  
+    if(buffer.CloseBuffer[index] < buffer.MA200Buffer[index] && buffer.OpenBuffer[index] < buffer.MA200Buffer[index])
+       signal |= SIG_TREND_MA200_SHORT;
+    else if(buffer.CloseBuffer[index] > buffer.MA200Buffer[index] && buffer.OpenBuffer[index] > buffer.MA200Buffer[index])
+       signal |= SIG_TREND_MA200_LONG;    
+     
+}
+
+void checkADXI(Buffers &buffer,int sysSignalOption,int &signal,MetaInfo &Info,int index)
+{
+    
+    
+    if( buffer.ATX_MINUS_Buffer[index] > buffer.ATX_PLUS_Buffer[index])
+        signal |= SIG_TREND_ADXI_SHORT;
+    else
+        signal |= SIG_TREND_ADXI_LONG;    
+        
+     
+      if(buffer.ATX_MAIN_Buffer[index] > 30.0)
+         signal |= SIG_TREND_ADXI_CONFIRMED;  
+         
+    Info.ADXI_MAIN = buffer.ATX_MAIN_Buffer[index];
+    Info.ADXI_MINUS = buffer.ATX_MINUS_Buffer[index];
+    Info.ADXI_PLUS = buffer.ATX_PLUS_Buffer[index]; 
+    
+    //Print("ADX "+buffer.TimeBuffer[index]+" Main: "+buffer.ATX_MAIN_Buffer[index]);     
+        
 }
 
 
@@ -272,12 +296,21 @@ bool checkSIG_SR_BREAKTHROUGHBEARISH(Buffers &buffer,SR_Zone &zones[],int sig, M
             result=true;
             break;
          }
+         
      }
      
    
   
    }
   }
+  
+  if(ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)==0) 
+  {
+     SR_Zone emptyZone;
+       ArrayResize(Info.iSIG_SR_BREAKTHROUGHBEARISH,ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)+1,0);
+            //copySRZones(zones[i],Info.SR_BREAKS[ArraySize(Info.SR_BREAKS)-1]);
+            Info.iSIG_SR_BREAKTHROUGHBEARISH[ArraySize(Info.iSIG_SR_BREAKTHROUGHBEARISH)-1]=emptyZone;
+   }   
   
   return result;
 

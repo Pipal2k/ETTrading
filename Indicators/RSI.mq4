@@ -31,7 +31,6 @@ int OnInit(void)
    string short_name;
 //--- 2 additional buffers are used for counting.
    IndicatorBuffers(3);
-   SetIndexBuffer(0,ExtRSIBuffer);
    SetIndexBuffer(1,ExtPosBuffer);
    SetIndexBuffer(2,ExtNegBuffer);
 //--- indicator line

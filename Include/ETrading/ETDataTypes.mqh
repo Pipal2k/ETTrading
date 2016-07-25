@@ -41,6 +41,12 @@
 #define SIG_CS_INVERTEDHAMMER 0x10000
 #define SIG_SHORTTREND 0x20000
 #define SIG_LONGTREND 0x40000
+#define SIG_TREND_ADXI_CONFIRMED 0x80000
+#define SIG_TREND_ADXI_LONG 0x100000
+#define SIG_TREND_ADXI_SHORT 0x200000
+#define SIG_TREND_MA200_LONG 0x400000
+#define SIG_TREND_MA200_SHORT 0x800000
+//#define SIG_TREND_ADXI_SHORT 0x200000
 
 enum Position
 {
@@ -76,8 +82,9 @@ enum SignalSys_Options
    DRAW_SR_MID_PIVOTS = 0x02,
    DEBUG_SIGNALS = 0x04,
    USE_MIDPIVOTS =0x08,
-   TREND_ADXI = 0x10
+   //TREND_ADXI = 0x10
 };
+
 
 enum FlagOperator
 {
@@ -117,31 +124,10 @@ struct TradeTrigger
  };
 
 
-struct Configuration
-{
-   //bool doKalibration;
-   //bool useDatesForKalibration;
-   //bool useTradingTime;
-   //datetime KalibarationStartDate;
-   //datetime KalibrationEndDate;
-   //string InpFileName;
 
-   bool TriggerBearishEngulfing;
-   bool TriggerBullishEngulfing;
-   bool TriggerHammer;
-   bool TriggerInvertedHammer;
-   bool TriggerDarkClouds;
-   bool TriggerThreeWhiteSoldiers;
-   bool TriggerADX;
-   bool TriggerStochCrossing;
-   
-   //bool simulate;
-   //bool ProfitOption;
-   //double stdv;
-  
-   
-   //bool doOnlyTradesOnTrend;
-};
+
+
+
 
 enum PivotKind
 {
@@ -192,7 +178,7 @@ struct SR_Zone
 
 struct ProvidedData {
    SR_Zone zones[];
-   int TrendFlags;
+  // int TrendFlags;
    
 };
 
@@ -200,7 +186,7 @@ struct MetaInfo
 {
   //SR_Zone SR_BREAKS[];
   //SR_Zone SR_TOUCHED[];
-  
+  int barIndex;
   SR_Zone iSIG_SR_TOUCHLOWERBOUNDERY[];
   SR_Zone iSIG_SR_TOUCHHIGHERBOUNDERY[];
   SR_Zone iSIG_SR_BREAKTHROUGHBEARISH[];
@@ -209,6 +195,10 @@ struct MetaInfo
   double RSI;
   double STOCH;
   double CCI;
+  
+  double ADXI_MAIN;
+  double ADXI_MINUS;
+  double ADXI_PLUS;
   
   //double open;
   Buffers buffer;
@@ -249,18 +239,73 @@ enum PatternStatus
   Disabled
 };
 
+enum ExecutionType
+{
+   Single,
+   NotSingle
+};
+
+struct Positioning 
+{
+    Position pos;
+    PositionMethod posMethod;
+    int posOptions;
+};
+
+struct KorrPattern
+{
+ string name;
+ string PatternNames[];
+ Positioning position;
+ PatternStatus status;
+};
+
+
+void copyKorrPatternArray(KorrPattern &dest[], KorrPattern &src[])
+{
+     for(int i = 0; i < ArraySize(src); i++)
+     {
+          ArrayResize(dest,ArraySize(dest)+1,0);
+          copyKorrPattern(dest[ArraySize(dest)-1],src[i]);
+     }
+}
+
+void copyKorrPattern(KorrPattern &dest, KorrPattern &src)
+{
+   for(int i = 0; i < ArraySize(src.PatternNames); i++)
+   {
+       ArrayResize(dest.PatternNames,ArraySize(dest.PatternNames)+1,0);
+       dest.PatternNames[ArraySize(dest.PatternNames)-1]=src.PatternNames[i];
+   }
+   
+   copyPositioning(dest.position,src.position);
+   dest.status= src.status;
+   dest.name = src.name;
+}
+
+void copyPositioning(Positioning &dest,Positioning &src)
+{
+     dest.pos = src.pos;
+     dest.posMethod = src.posMethod;
+     dest.posOptions = src.posOptions;
+}
 
 
 struct ActionPattern
 {
   string name;
-  string Expression;
-  Position pos;
+  string Symbol;
+  int timeframe;
   
+  string Expression;
   datetime matchingTimes[];
+  Positioning position;
+  /*Position pos;
   PositionMethod posMethod;
-  int posOptions;
+  int posOptions;*/
+  
   PatternStatus status;
+  ExecutionType execution;
   
   ETSignal matchingSignal[];
   ProvidedData prepData;
@@ -315,6 +360,8 @@ enum WhereOperantFunc
    iR2,
    iR3,
    iRESISTANCE,
+   iDPivot,
+   iWPivot,
    iS1,
    iS2,
    iS3,
@@ -326,7 +373,10 @@ enum WhereOperantFunc
    iSIG_BEARISHCANDLESTICK,
    iSIG_BULLISHCADLESTICK,
    iSIG_CS_BEARSIHENGULFING,
-   iSR_R1
+   iSR_R1,
+   iSIG_TREND_ADX_MAIN,
+   iSIG_TREND_ADX_MINUS,
+   iSIG_TREND_ADX_PLUS
 };
 
 struct WhereCondition
@@ -368,10 +418,14 @@ void copyMetaInfo(MetaInfo &src, MetaInfo &dst)
    //ArrayCopy(dst.SR_TOUCHED,src.SR_TOUCHED,0,0,WHOLE_ARRAY);
    ArrayCopy(dst.iSIG_SR_TOUCHLOWERBOUNDERY,src.iSIG_SR_TOUCHLOWERBOUNDERY,0,0,WHOLE_ARRAY);
     ArrayCopy(dst.iSIG_SR_TOUCHHIGHERBOUNDERY,src.iSIG_SR_TOUCHHIGHERBOUNDERY,0,0,WHOLE_ARRAY);
-    
+    dst.barIndex = src.barIndex;
     dst.CCI = src.CCI;
     dst.RSI= src.RSI;
     dst.STOCH =src.STOCH;
+    
+    dst.ADXI_MAIN = src.ADXI_MAIN;
+    dst.ADXI_MINUS = src.ADXI_MINUS;
+    dst.ADXI_PLUS = src.ADXI_PLUS;
     //dst.open = src.open;
     
     CopyBuffer(dst.buffer,0,ArraySize(src.buffer.OpenBuffer),src.buffer,false);
@@ -427,16 +481,33 @@ void copyActionPattern(ActionPattern &dest[], ActionPattern &source[])
 }
 void copyActionPattern(ActionPattern &dest, ActionPattern &source)
 {
-     dest.pos= source.pos;
+     dest.Symbol =source.Symbol;
+     dest.timeframe = source.timeframe;
+     
+     
      dest.Expression = source.Expression;
      dest.name = source.name;
     
+     /*dest.pos= source.pos;
      dest.posMethod= source.posMethod;
-     dest.posOptions=source.posOptions;
+     dest.posOptions=source.posOptions;*/
+     copyPositioning(dest.position,source.position);
+     //dest.position.pos= source.position.pos;
+     //dest.position.posMethod= source.position.posMethod;
+     //dest.position.posOptions=source.position.posOptions;
+     
+     dest.execution = source.execution;
+     
      dest.status = source.status;
      
      copyETSignal(source.matchingSignal,dest.matchingSignal);
-     //copyProvidedData(dest.prepData,source.prepData);
+     copyProvidedData(dest.prepData,source.prepData);
+     
+     for(int x=0; x < ArraySize(source.matchingTimes); x++)
+     {
+        ArrayResize(dest.matchingTimes,ArraySize(dest.matchingTimes)+1,0);
+        dest.matchingTimes[ArraySize(dest.matchingTimes)-1]= source.matchingTimes[x];
+     }
      
 }
 
@@ -464,6 +535,16 @@ struct ETPosition
   Position pos;
   
   int orderid;
+  
+  int posOptions;
 };
 
- 
+struct DataByTimeFrame
+{
+  int timeframe;
+  Buffers buffer;
+  ProvidedData provdata;
+  
+  ETSignal CurrentSignals[];
+  ETSignal lastSignal;
+}; 

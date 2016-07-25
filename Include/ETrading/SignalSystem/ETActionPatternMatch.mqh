@@ -83,10 +83,10 @@ bool patternMatch(CompiledActionPattern &cAPattern, ETSignal &cSignals[],bool on
    
    //Print(ArraySize(cAPattern.actionPattern.matchingTimes));
    
-   for(int x=0;x < ArraySize(cAPattern.actionPattern.matchingTimes);x++)
+   /*for(int x=0;x < ArraySize(cAPattern.actionPattern.matchingTimes);x++)
    {
     Print("Match: "+cAPattern.actionPattern.matchingTimes[x]); 
-   }
+   }*/
    
    /*while(signalIndex < ArraySize(cSignals))
    {
@@ -267,6 +267,8 @@ bool checkTerm(CompiledTerm &term, ETSignal &signal)
 
 bool evaluateOperators(bool &conditions[],FlagOperator &fOperators[])
 {
+ // if(ArraySize(conditions)==3)
+ // Print("Evaluating: ", conditions[0]," ", conditions[1], " ", conditions[2]);
   bool result = false;
   
   if(ArraySize(fOperators) == 0 && conditions[0] == true)
@@ -304,6 +306,8 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
 {
    bool conditions[];
    
+  
+   
    for(int x=0; x < ArraySize(cAPattern.whereCondition); x++)
    {
        /*
@@ -314,11 +318,14 @@ bool checkWhereConditions(CompiledActionPattern &cAPattern)
        
        Operant op1[];
        Operant op2[];
+       //Print(ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals));
+       
        
        if(cAPattern.whereCondition[x].Operant1Typ == BAROPERANT )
        {
             for(int i =0; i < ArraySize(cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals);i++)
             {
+                 
                   //getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals[i].metaInfo,op1,op1Int); 
                   getFuncValue(cAPattern.whereCondition[x].Operant1Func,cAPattern.whereCondition[x].Operant1FuncAttr,cAPattern.compiledBarPatterns[cAPattern.whereCondition[x].OperantBarIndex1].matchingSignals[i].metaInfo,op1); 
             }      
@@ -441,7 +448,19 @@ bool isWhereCondTrue(Operant &op1[], Operant &op2[], string Operator)
           {
               for(int x = 0; x < ArraySize(op2); x++)
               {
-                
+                if( (Operator == "!=" || Operator == "=!") && (op1[i].isIntFlag == true && op2[x].isIntFlag == true) )
+                 {
+                    //return true;
+                    //Print("!= Cond8ition "+ (op1[i].opInt & op2[x].opInt));
+                     if((op1[i].opInt & op2[x].opInt)==false)
+                     {
+                       //Print("return true");
+                        condition = true;
+                        break;
+                     }
+                     
+                     
+                 }
                  if( (Operator == "=" || Operator == "==") && (op1[i].isIntFlag == false && op2[x].isIntFlag == false) )
                  {
                      //Print("OP1: "+op1[i].isIntFlag+ "OP2: "+op2[x].isIntFlag);
@@ -455,7 +474,7 @@ bool isWhereCondTrue(Operant &op1[], Operant &op2[], string Operator)
                  if((Operator == "=" || Operator == "==") && (op1[i].isIntFlag == true && op2[x].isIntFlag == true) )
                  {
                      
-                     Print("OP1: "+op1[i].opInt+ "OP2: "+op2[x].opInt);
+                     //Print("OP1: "+op1[i].opInt+ "OP2: "+op2[x].opInt);
                      if(op1[i].opInt & op2[x].opInt)
                      {
                         condition = true;
@@ -560,6 +579,20 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
        results[0].opInt |= RESISTANCE;
        return 1;
     }
+    else if(func == iDPivot)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= DPivot;
+       return 1;
+    }
+     else if(func == iWPivot)
+    {
+       ArrayResize(results,1,0);
+       results[0].isIntFlag=true;
+       results[0].opInt |= WPivot;
+       return 1;
+    }
     else if(func == iS1)
     {
        ArrayResize(results,1,0);
@@ -587,7 +620,14 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
        results[0].isIntFlag=true;
        results[0].opInt |= SUPPORT;
        return 1;
-    }                    
+    }
+    //else if(func == iSIG_TREND_ADX_MAIN)
+    //{
+    //   ArrayResize(results,1,0);
+    //   results[0].isIntFlag=true;
+    //   results[0].opInt |= SUPPORT;
+    //   return 1;
+    //}                    
     else if(func == iSIG_SR_BREAKTHROUGHBEARISH)
     {
       
@@ -605,6 +645,8 @@ int getFuncValue(WhereOperantFunc &func,WhereOperantFuncAttribute &funcAtrr,Meta
               }
                else if(funcAtrr == TYPE)
               {
+               //Print("in Type func");
+               //Print("SRType = "+metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].SRType);
                  ArrayResize(results,ArraySize(results)+1,0);
                  results[ArraySize(results)-1].isIntFlag=true;
                  results[ArraySize(results)-1].opInt = metaInfo.iSIG_SR_BREAKTHROUGHBEARISH[x].SRType;

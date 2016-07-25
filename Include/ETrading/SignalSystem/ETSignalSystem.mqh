@@ -28,15 +28,30 @@ ProvidedData provData;
 
 
 CompiledActionPattern compActionPatterns[];
+int nec_periods[];
 
 
 void initETSignalSystem( ActionPattern &input_actionPatterns[],  int DataProviderOptions_Flags, int SignalSystemOptions_Flags) export
 {  
+   
    SignalSystemOptions = SignalSystemOptions_Flags;
    initDataProviderSys(DataProviderOptions_Flags);
   //DataProviderOptions = DataProviderOptions_Flags;
    PrintOptions();
   // copyActionPattern(actionPatterns,input_actionPatterns);
+  
+   for(int i = 0; i < ArraySize(input_actionPatterns); i++)
+   {
+      if(input_actionPatterns[i].status == Enabled)
+      {
+         if(!periodArraySearch(nec_periods,input_actionPatterns[i].timeframe))
+         {
+            ArrayResize(nec_periods,ArraySize(nec_periods)+1,0);
+            nec_periods[ArraySize(nec_periods)-1]=input_actionPatterns[i].timeframe;
+         }
+   
+      }
+   }
    
    parseActionExpression(input_actionPatterns, compActionPatterns);
    
@@ -50,6 +65,21 @@ void initETSignalSystem( ActionPattern &input_actionPatterns[],  int DataProvide
    
 }
 
+bool periodArraySearch(int &inputArray[], int searchInt)
+{
+   bool result = false;
+   
+   for(int i = 0; i < ArraySize(inputArray); i++)
+   {
+       if(inputArray[i] == searchInt)
+       {
+         result = true;
+         break;
+       }
+   }
+  
+  return result;
+}
 
 
 
@@ -72,8 +102,8 @@ bool DoSignalProcessing(int count) export
    // {
    //  Print("RSI AT: "+barBuffers.TimeBuffer[i]+" "+barBuffers.RSIBuffer[i]);
    // }
-    
-    process(barBuffers,CurrentSignals,provData,lastSignal,SignalSystemOptions);
+    //Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal,int timeFrame,int SignalSystemOptions
+    process(barBuffers,CurrentSignals,provData,lastSignal,NULL,SignalSystemOptions);
     
     for(int i = 0; i < ArraySize(CurrentSignals); i++)
     {

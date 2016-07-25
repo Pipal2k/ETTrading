@@ -21,6 +21,12 @@ long VolumeBuffer[];
 double RSIBuffer[];
 double ATRBuffer[];
 
+double ATX_MAIN_Buffer[];
+double ATX_MINUS_Buffer[];
+double ATX_PLUS_Buffer[];
+
+double MA200Buffer[];
+
 /*double LowBandBuffer[];
 double HighBandBuffer[];
 double STOCHBuffer[];
@@ -55,7 +61,12 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
     //if(!ArrayIsSeries(buffer.VolumeBuffer))
       ArraySetAsSeries(buffer.VolumeBuffer,asSerie);
       ArraySetAsSeries(buffer.RSIBuffer,asSerie);
-      ArraySetAsSeries(buffer.ATRBuffer,asSerie); 
+      ArraySetAsSeries(buffer.ATRBuffer,asSerie);
+      ArraySetAsSeries(buffer.MA200Buffer,asSerie);
+      
+      ArraySetAsSeries(buffer.ATX_MAIN_Buffer,asSerie); 
+      ArraySetAsSeries(buffer.ATX_MINUS_Buffer,asSerie);
+      ArraySetAsSeries(buffer.ATX_PLUS_Buffer,asSerie);  
           
       
      //MA200DifPeriods ma200p;
@@ -66,7 +77,11 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
      ArrayFree(buffer.CloseBuffer);
      ArrayFree(buffer.TimeBuffer);
      ArrayFree(buffer.RSIBuffer);
-       ArrayFree(buffer.ATRBuffer);
+     ArrayFree(buffer.ATRBuffer);
+     ArrayFree(buffer.ATX_MAIN_Buffer);
+     ArrayFree(buffer.ATX_MINUS_Buffer);
+     ArrayFree(buffer.ATX_PLUS_Buffer);
+     ArrayFree(buffer.MA200Buffer);
      //ArrayFree(ma200p.CurrentMABuffer);
     // ArrayFree(ma200p.OneAboveMABuffer);
      //ArrayFree(ma200p.TwoAboveBuffer);
@@ -77,6 +92,7 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
       
      initRSIBuffer(buffer.RSIBuffer,timeframe,count,asSerie);
      initATRBuffer(buffer.ATRBuffer,timeframe,count,asSerie);
+     initMA200Buffer(buffer.MA200Buffer,timeframe,count,asSerie);
      //initHighBandBuffer(shift,buffer.HighBandBuffer,timeframe);
      //initLowBandBuffer(shift,buffer.LowBandBuffer,timeframe);
      //initSTOCHBuffer(shift,buffer.STOCHBuffer,timeframe);
@@ -92,6 +108,8 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
      //Print("TimeBuffer:"+ buffer.TimeBuffer[0]); 
      CopyTickVolume(NULL,timeframe,startDate,count,buffer.VolumeBuffer);
      
+     initATXBuffer(buffer.ATX_MAIN_Buffer,buffer.ATX_MINUS_Buffer,buffer.ATX_PLUS_Buffer,timeframe,count,asSerie);
+     initMA200Buffer(buffer.MA200Buffer,timeframe,count,asSerie);
      //initMA200DifStruct(buffer.TimeBuffer[1],ma200p);
      
      //ArrayCopy(buffer.CurrentMABuffer,ma200p.CurrentMABuffer);
@@ -103,16 +121,18 @@ void initBuffers(Buffers &buffer,datetime startDate,int count,int timeframe, boo
 
 void CopyBuffer(Buffers &destBuffer,int start,int count,Buffers &srcBuffer, bool asSerie)
 {
-   
-     
-   
    ArrayCopy(destBuffer.CloseBuffer,srcBuffer.CloseBuffer,0,start,count);
    ArrayCopy(destBuffer.HighBuffer,srcBuffer.HighBuffer,0,start,count);
    ArrayCopy(destBuffer.LowBuffer,srcBuffer.LowBuffer,0,start,count);
    ArrayCopy(destBuffer.OpenBuffer,srcBuffer.OpenBuffer,0,start,count);
    ArrayCopy(destBuffer.TimeBuffer,srcBuffer.TimeBuffer,0,start,count);
+   ArrayCopy(destBuffer.VolumeBuffer,srcBuffer.VolumeBuffer,0,start,count);
    ArrayCopy(destBuffer.RSIBuffer,srcBuffer.RSIBuffer,0,start,count);
    ArrayCopy(destBuffer.ATRBuffer,srcBuffer.ATRBuffer,0,start,count);
+    ArrayCopy(destBuffer.ATX_MAIN_Buffer,srcBuffer.ATX_MAIN_Buffer,0,start,count);
+   ArrayCopy(destBuffer.ATX_MINUS_Buffer,srcBuffer.ATX_MINUS_Buffer,0,start,count);
+   ArrayCopy(destBuffer.ATX_PLUS_Buffer,srcBuffer.ATX_PLUS_Buffer,0,start,count);
+   ArrayCopy(destBuffer.MA200Buffer,srcBuffer.MA200Buffer,0,start,count);
 }
 
 void initRSIBuffer(double &RSIBufferParam[], int timeframe,int count, bool asSerie)
@@ -149,3 +169,53 @@ void initATRBuffer(double &ARTRBufferParam[], int timeframe,int count, bool asSe
    }
 }
 
+
+void initATXBuffer(double &ATX_Main_Buffer[],double &ATX_MINUS_Buffer[],double &ATX_PLUS_Buffer[],int timeframe,int count, bool asSerie)
+{
+
+   double main;
+   double minusdi;
+   double plusdi;
+   
+   for(int i=0;i < count;i++)
+   {
+      if(asSerie) {
+         //atr = iATR(NULL,timeframe,14,i);
+         main = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_MAIN,i);
+         minusdi = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_MINUSDI,i);
+         plusdi = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_PLUSDI,i);
+       }  
+       if(!asSerie) {
+         //atr =  iATR(NULL,timeframe,14,count-(i+1));
+         main = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_MAIN,count-(i+1));
+         minusdi = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_MINUSDI,count-(i+1));
+         plusdi = iADX(NULL,timeframe,14,PRICE_CLOSE,MODE_PLUSDI,count-(i+1));        
+       }
+      
+      ArrayResize(ATX_Main_Buffer,ArraySize(ATX_Main_Buffer)+1,0);
+      ArrayResize(ATX_MINUS_Buffer,ArraySize(ATX_MINUS_Buffer)+1,0);
+      ArrayResize(ATX_PLUS_Buffer,ArraySize(ATX_PLUS_Buffer)+1,0);
+      ATX_Main_Buffer[i]=main;
+      ATX_PLUS_Buffer[i]=plusdi;
+      ATX_MINUS_Buffer[i]=minusdi;
+      
+   }
+}
+
+void initMA200Buffer(double &MA200Buffer[],int timeframe,int count, bool asSerie)
+{
+  double ma200;
+   for(int i=0;i < count;i++)
+   {
+      if(asSerie)
+         ma200 = iMA(NULL,timeframe,200,0,MODE_EMA,PRICE_CLOSE,i);
+         //atr = iATR(NULL,timeframe,14,i);
+       if(!asSerie)
+         ma200 = iMA(NULL,timeframe,200,0,MODE_EMA,PRICE_CLOSE,count-(i+1));
+         //atr =  iATR(NULL,timeframe,14,count-(i+1));
+      
+      ArrayResize(MA200Buffer,ArraySize(MA200Buffer)+1,0);
+      MA200Buffer[i]=ma200;
+      
+   }
+}

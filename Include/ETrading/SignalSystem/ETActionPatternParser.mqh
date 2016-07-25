@@ -348,6 +348,10 @@ bool mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
      func = iR3;
    else if (funcStr == "RESISTANCE")
      func = iRESISTANCE;
+   else if (funcStr == "DPIVOT")
+     func = iDPivot;
+   else if (funcStr == "WPIVOT")
+     func = iWPivot;   
    else if(funcStr == "S1")
      func = iS1;
    else if (funcStr == "S2")
@@ -369,7 +373,13 @@ bool mapOperantFunc(string funcStr, WhereOperantFunc &func, WhereOperantFuncAttr
    else if(funcStr == "SIG_BULLISHCANDLESTICK")
      func = iSIG_BULLISHCADLESTICK;
    else if(funcStr == "SIG_CS_BEARISHENGULFING")
-     func = iSIG_CS_BEARSIHENGULFING;         
+     func = iSIG_CS_BEARSIHENGULFING;
+   else if(funcStr == "SIG_TREND_ADX_MAIN")
+     func = iSIG_TREND_ADX_MAIN;
+   else if(funcStr == "SIG_TREND_ADX_MINUS")
+     func = iSIG_TREND_ADX_MINUS;
+   else if(funcStr == "SIG_TREND_ADX_PLUS")
+     func = iSIG_TREND_ADX_PLUS;        
           
     if(k==2)
         mapOperantFuncAttribute(splitted[1],funcAttr);
@@ -763,9 +773,17 @@ int StringToBitFlag(string flagS)
     else if(flagS== "SIG_BEARISHCANDLESTICK")
          return SIG_BEARISHCANDLESTICK;
     else if(flagS== "SIG_CS_BEARISHENGULFING")
-         return SIG_CS_BEARISHENGULFING;     
-                   
-               
+         return SIG_CS_BEARISHENGULFING;
+    else if(flagS== "SIG_TREND_ADXI_CONFIRMED")
+         return SIG_TREND_ADXI_CONFIRMED;
+    else if(flagS== "SIG_TREND_ADXI_LONG")
+         return SIG_TREND_ADXI_LONG;
+    else if(flagS== "SIG_TREND_ADXI_SHORT")
+         return SIG_TREND_ADXI_SHORT;
+    else if(flagS== "SIG_TREND_MA200_LONG")
+         return SIG_TREND_MA200_LONG;
+    else if(flagS== "SIG_TREND_MA200_SHORT")
+         return SIG_TREND_MA200_SHORT;           
          
   return -1;            
 }

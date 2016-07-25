@@ -44,7 +44,7 @@ void initDataProviderSys(int dpOptions)
 void provideData(ProvidedData &data)
 {
    findSRZones(data.zones);
-   findTrend(DataProviderOptions,data);
+   //findTrend(DataProviderOptions,data);
 }
 
 void findSRZones(SR_Zone &zones[])

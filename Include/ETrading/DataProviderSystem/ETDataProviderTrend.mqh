@@ -29,19 +29,3 @@
 // #import
 //+------------------------------------------------------------------+
 
-void findTrend(int dpOptions,ProvidedData &data)
-{
-  /*Position ADXI_CURRENT = None;
-  Position ADXI_M1 = None;
-  Position ADXI_M5 = None;
-  Position ADXI_M15 = None;
-  Position ADXI_M30 = None;
-  Position ADXI_H1 = None;  
-  Position ADXI_H4 = None;
-  Position ADXI_D1 = None;
-  Position ADXI_W1 = None;
-  Position ADXI_MN1 = None;*/
-  
- 
-  
-}
