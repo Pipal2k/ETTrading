@@ -85,6 +85,10 @@ bool periodArraySearch(int &inputArray[], int searchInt)
 
 bool DoSignalProcessing(int count) export
 {
+
+   
+  
+   ProvidedData provData;
     /*if(Volume[0]>1)
         return false;*/
     
@@ -92,24 +96,17 @@ bool DoSignalProcessing(int count) export
    // ArrayFree(zones);
     //Support Resistance Lineien
     //findSRZones(zones,DataProviderOptions);
+   
+   for(int i=0; i < ArraySize(nec_periods); i++)
+   {
+    Buffers barBuffers;
+    ETSignal CurrentSignals[];
+    ETSignal lastSignal;
     
     provideData(provData);
     
-    initBuffers(barBuffers,Time[0],count,Period(),false); 
-    //Print("Debug: "+barBuffers.TimeBuffer[0]);
-    
-   // for(int i = 0; i< ArraySize(barBuffers.RSIBuffer); i++)
-   // {
-   //  Print("RSI AT: "+barBuffers.TimeBuffer[i]+" "+barBuffers.RSIBuffer[i]);
-   // }
-    //Buffers &buffer, ETSignal &currentSIgnals[],ProvidedData &provData,ETSignal &lastSignal,int timeFrame,int SignalSystemOptions
+    initBuffers(barBuffers,Time[0],count,nec_periods[i],false);
     process(barBuffers,CurrentSignals,provData,lastSignal,NULL,SignalSystemOptions);
-    
-    for(int i = 0; i < ArraySize(CurrentSignals); i++)
-    {
-       //Print(CurrentSignals[i].time +" "+ CurrentSignals[i].metaInfo[0].
-    }
-  
     
     if(ArraySize(CurrentSignals) > 0)
        copyETSignal(CurrentSignals[ArraySize(CurrentSignals)-1],lastSignal);
@@ -118,7 +115,7 @@ bool DoSignalProcessing(int count) export
     
     if(SignalSystemOptions & DEBUG_SIGNALS)
      PrintSignalForDebug();
-    
+   }
     
    //Draw Objects
    ObjectsDeleteAll();

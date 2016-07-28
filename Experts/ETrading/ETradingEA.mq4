@@ -41,9 +41,10 @@ int OnInit()
   actionPatterns[0].name="TEST PATTERN";
   actionPatterns[0].Expression = "[SIG_BARBULLISH] WHERE RSI > 80";
   actionPatterns[0].status=Enabled;
+  actionPatterns[0].position.pos= Sell;
   actionPatterns[0].position.posOptions = SingleTarget;
   actionPatterns[0].position.posMethod=ATR;
-  actionPatterns[0].position.pos= Sell;
+  
   
   actionPatterns[1].timeframe=PERIOD_D1;
   actionPatterns[1].position.pos= Buy;
